@@ -2,15 +2,22 @@ using UnityEngine;
 
 public class PlayerAnimator : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public Animator animator;
+
+    public void PlayAttack()
     {
-        
+        animator.SetTrigger("Attack");
     }
 
-    // Update is called once per frame
-    void Update()
+    public void PlayHurt()
     {
-        
+        animator.SetTrigger("Hurt");
+    }
+
+    public void PlayDeath()
+    {
+        animator.SetTrigger("Death");
     }
 }
+
+
