@@ -148,6 +148,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2df5fec368c4f6b4e94a1c806d22bfae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  totalRegularRooms: 7
+  bossRoom: 1
+  combatWeight: 70
+  rewardWeight: 30
+  mapSceneName: MapScene
+  combatSceneName: CombatScene
+  rewardSceneName: RewardScene
+  bossSceneName: BossScene
+  showDebugLogs: 1
 --- !u!4 &43411473
 Transform:
   m_ObjectHideFlags: 0
@@ -174,9 +183,10 @@ GameObject:
   - component: {fileID: 108762879}
   - component: {fileID: 108762878}
   - component: {fileID: 108762877}
+  - component: {fileID: 108762880}
   m_Layer: 0
-  m_Name: Square
-  m_TagString: Untagged
+  m_Name: RoomExit
+  m_TagString: RoomExit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -297,6 +307,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &108762880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 108762876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc365e4ba247f074ea2284ed731e20a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showDebugLogs: 1
+  gizmoColor: {r: 0, g: 1, b: 0, a: 0.5}
 --- !u!1 &506106130
 GameObject:
   m_ObjectHideFlags: 0
@@ -309,9 +333,10 @@ GameObject:
   - component: {fileID: 506106132}
   - component: {fileID: 506106131}
   - component: {fileID: 506106134}
+  - component: {fileID: 506106135}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -436,6 +461,35 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridSize: 3
   moveSpeed: 5
+  showDebugLogs: 1
+  showOnScreenDebug: 1
+--- !u!50 &506106135
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 506106130}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 0
+  m_CollisionDetection: 0
+  m_Constraints: 4
 --- !u!1 &645015453
 GameObject:
   m_ObjectHideFlags: 0
