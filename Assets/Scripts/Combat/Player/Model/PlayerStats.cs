@@ -2,7 +2,8 @@
 
 public class PlayerStats
 {
-    private static int BaseDamage = 1;
-    private static int MaxHP = 20;
-    private int CurrentHP;
+    public int MaxHP = 20;
+    public int CurrentHP = 20;
+    public int BaseDamage = 1;
 }
+

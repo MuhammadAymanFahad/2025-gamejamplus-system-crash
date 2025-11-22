@@ -2,15 +2,35 @@ using UnityEngine;
 
 public class PlayerView : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public PlayerModel Model;
+    public PlayerAnimator Animator;
+    public PlayerUI UI;
+
     void Start()
     {
-        
+        Model.OnHealthChanged += UpdateHP;
+        Model.OnAttack += PlayAttackAnimation;
+        Model.OnDamaged += PlayHurtEffect;
+        Model.OnDeath += PlayDeathAnimation;
     }
 
-    // Update is called once per frame
-    void Update()
+    void UpdateHP()
     {
-        
+        //UI.UpdateHPBar(Model.Stats.CurrentHP, Model.Stats.MaxHP);
+    }
+
+    void PlayAttackAnimation()
+    {
+        Animator.PlayAttack();
+    }
+
+    void PlayHurtEffect()
+    {
+        Animator.PlayHurt();
+    }
+
+    void PlayDeathAnimation()
+    {
+        Animator.PlayDeath();
     }
 }

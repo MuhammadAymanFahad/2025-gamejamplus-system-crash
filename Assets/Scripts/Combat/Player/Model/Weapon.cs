@@ -1,16 +1,16 @@
-using UnityEngine;
-
-public class Weapon : MonoBehaviour
+public class Weapon
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public int Grade;
+    public int AdoptCount;
+
+    public void Adopt(int newGrade)
     {
-        
+        Grade = newGrade;
+        AdoptCount++;
     }
 
-    // Update is called once per frame
-    void Update()
+    public bool ShouldDrop()
     {
-        
+        return AdoptCount >= 5;
     }
 }
