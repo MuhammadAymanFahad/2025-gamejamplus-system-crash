@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerManager : MonoBehaviour, IPlayer
 {
@@ -25,13 +25,20 @@ public class PlayerManager : MonoBehaviour, IPlayer
     public bool CanFlee => stats.canFlee;
     public bool IsAlive => stats.IsAlive();
 
-    // Combat Actions
+    public void SetCombatState(bool inCombat)
+    {
+        stats.isInCombat = inCombat;
+        Debug.Log($"Combat state: {(inCombat ? "ENTERED" : "EXITED")}");
+    }
+
     public void TakeDamage(int damage)
     {
-        stats.currentHP -= damage;
+        int oldHP = stats.currentHP;
+        stats.currentHP = DamageCalculator.CalculateRemainingHP(stats.currentHP, damage);
+
         Debug.Log($"Player takes {damage} damage! HP: {stats.currentHP}/{stats.maxHP}");
 
-        if (stats.currentHP <= 0)
+        if (!IsAlive)
         {
             Die();
         }
@@ -39,15 +46,18 @@ public class PlayerManager : MonoBehaviour, IPlayer
 
     public void Heal(int amount)
     {
+        int oldHP = stats.currentHP;
         stats.currentHP += amount;
+
         if (stats.currentHP > stats.maxHP)
         {
             stats.currentHP = stats.maxHP;
         }
-        Debug.Log($"Player healed {amount}! HP: {stats.currentHP}/{stats.maxHP}");
+
+        int actualHeal = stats.currentHP - oldHP;
+        Debug.Log($"Player healed {actualHeal} HP! ({oldHP} → {stats.currentHP}/{stats.maxHP})");
     }
 
-    // Weapon System
     public void EquipWeapon(int grade)
     {
         if (stats.weaponGrade > 0)
@@ -81,7 +91,6 @@ public class PlayerManager : MonoBehaviour, IPlayer
         // TODO: Send to discard pile via CardManager
     }
 
-    // Navigation
     public void Flee()
     {
         if (!stats.canFlee)
@@ -113,18 +122,6 @@ public class PlayerManager : MonoBehaviour, IPlayer
     // Testing
     void Update()
     {
-        // Test damage
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            TakeDamage(5);
-        }
-
-        // Test heal
-        if (Input.GetKeyDown(KeyCode.J))
-        {
-            Heal(3);
-        }
-
         // Test equip weapon
         if (Input.GetKeyDown(KeyCode.K))
         {

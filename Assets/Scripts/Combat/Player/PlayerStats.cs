@@ -25,12 +25,4 @@ public class PlayerStats : MonoBehaviour
     public int GetDamage() => weaponGrade > 0 ? weaponGrade : 1;
     public bool IsAlive() => currentHP > 0;
     public bool ShouldDropWeapon() => weaponKillCount >= MAX_WEAPON_KILLS;
-
-    // Debug display
-    void OnGUI()
-    {
-        GUI.Label(new Rect(10, 10, 200, 30), $"HP: {currentHP}/{maxHP}");
-        GUI.Label(new Rect(10, 40, 200, 30), $"Weapon: {weaponGrade} ({weaponKillCount}/5)");
-        GUI.Label(new Rect(10, 70, 200, 30), $"Can Flee: {canFlee}");
-    }
 }

@@ -50,9 +50,12 @@ public interface IPlayer
     int MaxHP { get; }
     int WeaponGrade { get; }
     bool CanFlee { get; }
+    bool IsAlive { get; } // ✅ Already added before
+
     void TakeDamage(int damage);
     void Heal(int amount);
     void EquipWeapon(int grade);
+    void SetCombatState(bool inCombat); // ✅ NEW
 }
 
 // Events untuk komunikasi antar system
