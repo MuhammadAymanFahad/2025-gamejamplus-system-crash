@@ -83,6 +83,14 @@ public class TurnManager : MonoBehaviour
 
     void EndPlayerTurn()
     {
+        // ✅ Check if combat should end BEFORE monster turn
+        if (activeMonsters.Count == 0)
+        {
+            currentPhase = TurnPhase.CombatEnd;
+            CombatEvents.TriggerCombatEnd();
+            return; // ✅ Don't proceed to monster turn!
+        }
+
         currentPhase = TurnPhase.MonsterTurn;
         MonstersTurn();
     }
@@ -108,6 +116,7 @@ public class TurnManager : MonoBehaviour
             }
         }
 
+        // ✅ Double-check after attacks (in case monster died from counter-attack or something)
         if (activeMonsters.Count == 0)
         {
             currentPhase = TurnPhase.CombatEnd;
