@@ -6,8 +6,8 @@ public class MusicManager : MonoBehaviour
     public static MusicManager Instance { get; private set; }
 
     [Header("Sources")]
-    public AudioSource sourceA;
-    public AudioSource sourceB;
+    public AudioSource mainMenu;
+    public AudioSource exploration;
 
     [Header("Settings")]
     public float crossfadeDuration = 1.5f;
@@ -32,13 +32,13 @@ public class MusicManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         // Validation
-        if (sourceA == null || sourceB == null)
+        if (mainMenu == null || exploration == null)
         {
             Debug.LogError("MusicManager requires two AudioSource components assigned.");
         }
 
-        activeSource = sourceA;
-        idleSource = sourceB;
+        activeSource = mainMenu;
+        idleSource = exploration;
 
         activeSource.loop = true;
         idleSource.loop = true;
@@ -79,11 +79,12 @@ public class MusicManager : MonoBehaviour
     }
 
     // Public API used by scenes
-    public void PlayMusic()
+    public void PlayExplorationMusic()
     {
         if (!isEnabled) return;
 
-        StartCoroutine(CrossfadeRoutine());
+        activeSource.Stop();
+        idleSource.Play();
     }
 
     private IEnumerator CrossfadeRoutine()
