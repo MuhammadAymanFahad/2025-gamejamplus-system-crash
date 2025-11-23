@@ -31,10 +31,10 @@ public class CombatManager : MonoBehaviour, ICombatSystem
     }
 
     // ICombatSystem implementation
-    public void StartCombat(List<Card> roomCards)
+    public void StartCombat(List<CardTest> roomCards)
     {
         // Filter hanya monster
-        List<Card> monsters = roomCards.FindAll(c => c.isMonster);
+        List<CardTest> monsters = roomCards.FindAll(c => c.isMonster);
 
         if (monsters.Count == 0)
         {
@@ -50,7 +50,7 @@ public class CombatManager : MonoBehaviour, ICombatSystem
         Debug.Log($"=== COMBAT START === {monsters.Count} monsters");
     }
 
-    public void PlayerAttack(Card targetMonster)
+    public void PlayerAttack(CardTest targetMonster)
     {
         if (!inCombat) return;
         turnManager.PlayerAttackMonster(targetMonster);
@@ -92,11 +92,11 @@ public class CombatManager : MonoBehaviour, ICombatSystem
 
     void TestCombat()
     {
-        List<Card> testCards = new List<Card> {
-        new Card("Clover", 4),   // ✅ Monster grade 4, HP 4
-        new Card("Spade", 10),   // ✅ Monster grade 10, HP 10
-        new Card("Heart", 5),    // Potion
-        new Card("Diamond", 6)   // Weapon
+        List<CardTest> testCards = new List<CardTest> {
+        new CardTest("Clover", 4),   // ✅ Monster grade 4, HP 4
+        new CardTest("Spade", 10),   // ✅ Monster grade 10, HP 10
+        new CardTest("Heart", 5),    // Potion
+        new CardTest("Diamond", 6)   // Weapon
     };
 
         StartCombat(testCards);

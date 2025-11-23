@@ -12,7 +12,7 @@ public class TurnManager : MonoBehaviour
 {
     public TurnPhase currentPhase = TurnPhase.PlayerTurn;
 
-    private List<Card> activeMonsters = new List<Card>();
+    private List<CardTest> activeMonsters = new List<CardTest>();
     private PlayerManager player;
 
     void Start()
@@ -20,12 +20,12 @@ public class TurnManager : MonoBehaviour
         player = PlayerManager.Instance;
     }
 
-    public void InitializeCombat(List<Card> monsters)
+    public void InitializeCombat(List<CardTest> monsters)
     {
-        activeMonsters = new List<Card>(monsters);
+        activeMonsters = new List<CardTest>(monsters);
 
         // ✅ INITIALIZE HP untuk setiap monster
-        foreach (Card monster in activeMonsters)
+        foreach (CardTest monster in activeMonsters)
         {
             monster.InitializeCombat(); // currentHP = grade
         }
@@ -34,13 +34,13 @@ public class TurnManager : MonoBehaviour
         Debug.Log($"Combat started! {activeMonsters.Count} monsters");
 
         // Debug info
-        foreach (Card m in activeMonsters)
+        foreach (CardTest m in activeMonsters)
         {
             Debug.Log($"  - Monster grade {m.grade}, HP: {m.currentHP}");
         }
     }
 
-    public void PlayerAttackMonster(Card targetMonster)
+    public void PlayerAttackMonster(CardTest targetMonster)
     {
         if (currentPhase != TurnPhase.PlayerTurn)
         {
@@ -85,7 +85,7 @@ public class TurnManager : MonoBehaviour
     {
         Debug.Log("--- MONSTERS TURN ---");
 
-        foreach (Card monster in activeMonsters)
+        foreach (CardTest monster in activeMonsters)
         {
             // ✅ Pass player weapon grade untuk damage reduction
             int damage = DamageCalculator.CalculateMonsterDamage(monster, player.WeaponGrade);
@@ -117,7 +117,7 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    void OnMonsterKilled(Card monster)
+    void OnMonsterKilled(CardTest monster)
     {
         Debug.Log($"Monster KILLED! Grade: {monster.grade}, Final HP: {monster.currentHP}");
 
@@ -147,5 +147,5 @@ public class TurnManager : MonoBehaviour
 
     // Getters
     public bool IsPlayerTurn() => currentPhase == TurnPhase.PlayerTurn;
-    public List<Card> GetActiveMonsters() => activeMonsters;
+    public List<CardTest> GetActiveMonsters() => activeMonsters;
 }
