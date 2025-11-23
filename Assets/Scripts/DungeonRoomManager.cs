@@ -7,17 +7,12 @@ public class DungeonRoomManager : MonoBehaviour
     
     [Header("Level Configuration")]
     [Tooltip("Number of regular rooms (Combat/Reward) to generate")]
-    public int totalRegularRooms = 10;
+    public int totalRegularRooms = 7;
+    public int currentLevelIndex = 1;
     
     [Tooltip("Number of boss rooms to generate (typically 1)")]
     public int bossRoom = 1;
-
-    [Header("Room Generation Weights")]
-    [Tooltip("Probability weight for combat rooms (0-100)")]
-    [Range(0, 100)] public int combatWeight = 70;
-    
-    [Tooltip("Probability weight for reward rooms (0-100)")]
-    [Range(0, 100)] public int rewardWeight = 30;
+    public bool isHaveKey = false;
 
     [Header("Scene References")]
     [Tooltip("Name of the map/exploration scene")]
@@ -26,11 +21,11 @@ public class DungeonRoomManager : MonoBehaviour
     [Tooltip("Name of the combat encounter scene")]
     public string combatSceneName = "CombatScene";
     
-    [Tooltip("Name of the reward/treasure scene")]
-    public string rewardSceneName = "RewardScene";
-    
     [Tooltip("Name of the boss battle scene")]
     public string bossSceneName = "BossScene";
+
+    public string nextFloorSceneName = "World_2";
+    public string mainMenuSceneName = "01_MainMenu";
     
     private List<RoomType> dungeonRooms = new List<RoomType>();
     
@@ -70,7 +65,7 @@ public class DungeonRoomManager : MonoBehaviour
         // Generate regular rooms based on weighted probabilities
         for (int i = 0; i < totalRegularRooms; i++)
         {
-            dungeonRooms.Add(GetRandomRoomType());
+            dungeonRooms.Add(RoomType.Combat);
         }
 
         // Add boss room(s) at the end
@@ -79,23 +74,13 @@ public class DungeonRoomManager : MonoBehaviour
             dungeonRooms.Add(RoomType.Boss);
         }
 
+
         // Initialize progression at entrance
         currentRoomIndex = 0;
     }
 
-    /// Selects a random room type based on configured weight probabilities
-    /// Higher weight = higher chance of selection
-    private RoomType GetRandomRoomType()
-    {
-        int totalWeight = combatWeight + rewardWeight;
-        int randomValue = Random.Range(0, totalWeight);
 
-        // Check if random value falls within combat weight range
-        if (randomValue < combatWeight)
-            return RoomType.Combat;
-        else
-            return RoomType.Reward;
-    }
+   
     
     
     /// Advances to the next room in the dungeon sequence
@@ -108,17 +93,19 @@ public class DungeonRoomManager : MonoBehaviour
     {
         // Move to next room
         currentRoomIndex++;
-        
+    
         // Check for dungeon completion
         if (currentRoomIndex >= dungeonRooms.Count)
         {
-            OnDungeonComplete();
+            currentRoomIndex = dungeonRooms.Count - 1;
             return;
         }
         
         // Get next room type and load its scene
         RoomType nextRoom = dungeonRooms[currentRoomIndex];
         LoadRoomScene(nextRoom);
+
+        
     }
 
     /// Loads the appropriate scene based on room type
@@ -139,8 +126,6 @@ public class DungeonRoomManager : MonoBehaviour
         {
             case RoomType.Combat:
                 return combatSceneName;
-            case RoomType.Reward:
-                return rewardSceneName;
             case RoomType.Boss:
                 return bossSceneName;
             case RoomType.Entrance:
@@ -161,9 +146,23 @@ public class DungeonRoomManager : MonoBehaviour
     
     /// Called when player has completed all rooms in the dungeon
     /// Override or extend this method to implement victory/ending logic
-    private void OnDungeonComplete()
+    public void OnDungeonComplete()
     {
         Debug.Log("[DungeonRoomManager] Dungeon completed!");
+
+        if (isHaveKey)
+        {
+            if(currentLevelIndex >= 2)
+            {
+                SceneManager.LoadScene(mainMenuSceneName);
+            }
+            else
+            {
+                currentLevelIndex++;
+                SceneManager.LoadScene(nextFloorSceneName);
+            }
+            
+        }
         
     }
     
@@ -195,6 +194,14 @@ public class DungeonRoomManager : MonoBehaviour
     public IReadOnlyList<RoomType> GetDungeonLayout()
     {
         return dungeonRooms.AsReadOnly();
+    }
+
+    public void InitializeNewFloor()
+    {
+        isHaveKey = false;
+        currentRoomIndex = 0;
+        GenerateDungeonRooms();
+        
     }
     
 
