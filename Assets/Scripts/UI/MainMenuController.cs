@@ -15,7 +15,7 @@ public class MainMenu : MonoBehaviour
 
     public void StartGameButton()
     {
-        MusicManager.Instance.PlayMusic();
+        MusicManager.Instance.PlayExplorationMusic();
         SceneManager.LoadScene("World");
     }
 }
