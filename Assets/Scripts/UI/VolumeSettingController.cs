@@ -26,7 +26,7 @@ public class VolumeSettingController : MonoBehaviour
         PlayerPrefs.SetInt("MusicEnabled", enabled ? 1 : 0);
         
         // MusicManager
-        // MusicManager.Instance.SetEnabled(enabled);
+        MusicManager.Instance.SetEnabled(enabled);
     }
 
     // Called when SFX checkbox clicked

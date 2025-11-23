@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 public class MainMenu : MonoBehaviour
 {
+    [Header("Music")]
+    public AudioClip menuMusicClip;
+
     public void ExitButton()
     {
         Application.Quit();
@@ -12,6 +15,7 @@ public class MainMenu : MonoBehaviour
 
     public void StartGameButton()
     {
-        SceneManager.LoadScene("02_MapScene");
+        MusicManager.Instance.PlayMusic();
+        SceneManager.LoadScene("World");
     }
 }
