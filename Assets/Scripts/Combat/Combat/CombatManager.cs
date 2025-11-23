@@ -1,8 +1,5 @@
-﻿using NUnit.Framework.Internal;
-using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class CombatManager : MonoBehaviour, ICombatSystem
 {
@@ -28,13 +25,38 @@ public class CombatManager : MonoBehaviour, ICombatSystem
     void Start()
     {
         player = PlayerManager.Instance;
+
+        CombatEvents.OnCombatEnd += HandleCombatEnd;
+        CombatEvents.OnPlayerDeath += HandlePlayerDeath;
     }
 
-    // ICombatSystem implementation
-    public void StartCombat(List<CardTest> roomCards)
+    void OnDestroy()
     {
-        // Filter hanya monster
-        List<CardTest> monsters = roomCards.FindAll(c => c.isMonster);
+        // ✅ Unsubscribe to prevent memory leaks
+        CombatEvents.OnCombatEnd -= HandleCombatEnd;
+        CombatEvents.OnPlayerDeath -= HandlePlayerDeath;
+    }
+
+    void HandleCombatEnd()
+    {
+        if (!inCombat) return;
+
+        Debug.Log("=== COMBAT END - VICTORY ===");
+        EndCombat();
+    }
+
+    void HandlePlayerDeath()
+    {
+        if (!inCombat) return;
+
+        Debug.Log("=== COMBAT END - DEFEAT ===");
+        EndCombat();
+        // TODO: Trigger Game Over screen
+    }
+
+    public void StartCombat(List<CombatCard> roomCards)
+    {
+        List<CombatCard> monsters = roomCards.FindAll(c => c.isMonster);
 
         if (monsters.Count == 0)
         {
@@ -43,7 +65,7 @@ public class CombatManager : MonoBehaviour, ICombatSystem
         }
 
         inCombat = true;
-        player.GetComponent<PlayerStats>().isInCombat = true;
+        player.SetCombatState(true); // ✅ Use interface method
 
         turnManager.InitializeCombat(monsters);
 
@@ -53,52 +75,41 @@ public class CombatManager : MonoBehaviour, ICombatSystem
     public void PlayerAttack(CardTest targetMonster)
     {
         if (!inCombat) return;
+        if (!turnManager.IsPlayerTurn())
+        {
+            Debug.Log("Not player's turn!");
+            return;
+        }
+
         turnManager.PlayerAttackMonster(targetMonster);
     }
 
-    public void PlayerUsePotion(int potency)
+    // ✅ NEW: Public method untuk heal (consumes turn)
+    public void PlayerHeal(int potency)
     {
-        if (!inCombat) return;
+        if (!inCombat)
+        {
+            // Heal outside combat (no turn consumed)
+            player.Heal(potency);
+            return;
+        }
+
+        if (!turnManager.IsPlayerTurn())
+        {
+            Debug.Log("Not player's turn!");
+            return;
+        }
+
+        // Heal in combat (consumes turn)
         turnManager.PlayerUsePotion(potency);
     }
 
     public void EndCombat()
     {
         inCombat = false;
-        player.GetComponent<PlayerStats>().isInCombat = false;
-        Debug.Log("Combat ended!");
+        player.SetCombatState(false); // ✅ Use method instead of direct access
+        Debug.Log("Combat system cleaned up!");
     }
 
     public bool IsInCombat() => inCombat;
-
-    // Testing
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            TestCombat();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Space) && inCombat)
-        {
-            // Attack first monster
-            var monsters = turnManager.GetActiveMonsters();
-            if (monsters.Count > 0)
-            {
-                PlayerAttack(monsters[0]);
-            }
-        }
-    }
-
-    void TestCombat()
-    {
-        List<CardTest> testCards = new List<CardTest> {
-        new CardTest("Clover", 4),   // ✅ Monster grade 4, HP 4
-        new CardTest("Spade", 10),   // ✅ Monster grade 10, HP 10
-        new CardTest("Heart", 5),    // Potion
-        new CardTest("Diamond", 6)   // Weapon
-    };
-
-        StartCombat(testCards);
-    }
 }

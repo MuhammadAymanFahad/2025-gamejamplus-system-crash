@@ -48,9 +48,11 @@ public class TurnManager : MonoBehaviour
             return;
         }
 
-        // ✅ Player attacks - KURANGI currentHP, bukan grade!
+        // Player attacks
         int damage = DamageCalculator.CalculatePlayerDamage(player.WeaponGrade);
-        targetMonster.currentHP -= damage;
+
+        // ✅ Use DamageCalculator utility
+        targetMonster.currentHP = DamageCalculator.CalculateRemainingHP(targetMonster.currentHP, damage);
 
         Debug.Log($"Player attacks for {damage}! Monster HP: {targetMonster.currentHP}/{targetMonster.grade}");
 
@@ -66,12 +68,16 @@ public class TurnManager : MonoBehaviour
 
     public void PlayerUsePotion(int potency)
     {
-        if (currentPhase != TurnPhase.PlayerTurn) return;
+        if (currentPhase != TurnPhase.PlayerTurn)
+        {
+            Debug.Log("Not player turn!");
+            return;
+        }
 
         player.Heal(potency);
-        Debug.Log($"Player used potion (grade {potency})");
+        Debug.Log($"Player used potion (grade {potency}) - Turn consumed!");
 
-        // Potion consumes turn
+        // ✅ Potion consumes turn - monsters attack now!
         EndPlayerTurn();
     }
 
@@ -87,10 +93,7 @@ public class TurnManager : MonoBehaviour
 
         foreach (CardTest monster in activeMonsters)
         {
-            // ✅ Pass player weapon grade untuk damage reduction
             int damage = DamageCalculator.CalculateMonsterDamage(monster, player.WeaponGrade);
-
-            // Show damage calculation
             int baseDamage = monster.grade;
             int reduction = player.WeaponGrade;
             Debug.Log($"Monster (grade {baseDamage}) attacks! Damage: {baseDamage} - {reduction} = {damage}");
@@ -100,15 +103,15 @@ public class TurnManager : MonoBehaviour
             if (!player.IsAlive)
             {
                 currentPhase = TurnPhase.CombatEnd;
+                CombatEvents.TriggerPlayerDeath();
                 return;
             }
         }
 
-        // Check if combat should end
         if (activeMonsters.Count == 0)
         {
             currentPhase = TurnPhase.CombatEnd;
-            EndCombat();
+            CombatEvents.TriggerCombatEnd();
         }
         else
         {
