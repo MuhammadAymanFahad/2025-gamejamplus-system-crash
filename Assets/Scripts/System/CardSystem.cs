@@ -5,7 +5,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.XR;
 
-public class CardSystem : MonoBehaviour
+public class CardSystem : Singleton<CardSystem>
 {
     [SerializeField] private HandView handView;
     [SerializeField] private Transform drawPilePoint;
@@ -18,13 +18,26 @@ public class CardSystem : MonoBehaviour
     {
         ActionSystem.AttachPerformer<DrawCardsGA>(DrawCardsPerformer);
         ActionSystem.AttachPerformer<DiscardAllCardsGA>(DiscardAllCardPerformer);
+        ActionSystem.SubscribePerformer<EnemyTurnGameAction>(EnemyTurnPreReaction, ReactionTiming.PRE);
+        ActionSystem.SubscribePerformer<EnemyTurnGameAction>(EnemyTurnPostReaction, ReactionTiming.POST);
     }
     void OnDisable()
     {
-        ActionSystem.AttachPerformer<DrawCardsGA>(DrawCardsPerformer);
-        ActionSystem.AttachPerformer<DiscardAllCardsGA>(DiscardAllCardPerformer);
+        ActionSystem.DetachPerformer<DrawCardsGA>();
+        ActionSystem.DetachPerformer<DiscardAllCardsGA>();
+        ActionSystem.UnSubscribePerformer<EnemyTurnGameAction>(EnemyTurnPreReaction, ReactionTiming.PRE);
+        ActionSystem.UnSubscribePerformer<EnemyTurnGameAction>(EnemyTurnPostReaction, ReactionTiming.POST);
     }
 
+    // Publics 
+    public void Setup (List<CardData> deckData)
+    {
+        foreach (var cardData in deckData)
+        {
+            Card card = new(cardData);
+            drawPile.Add(card);
+        }
+    }
     // performers
 
     private IEnumerator DrawCardsPerformer (DrawCardsGA drawCardsGA)
@@ -54,6 +67,19 @@ public class CardSystem : MonoBehaviour
             yield return DiscardCard(cardView);            
         }
         handPile.Clear();
+    }
+
+    // Reactions
+
+    private void EnemyTurnPreReaction (EnemyTurnGameAction enemyTurnGameAction)
+    {
+        DiscardAllCardsGA discardAllCardsGA = new ();
+        ActionSystem.Instance.AddReaction(discardAllCardsGA);
+    }
+    private void EnemyTurnPostReaction (EnemyTurnGameAction enemyTurnGameAction)
+    {
+        DrawCardsGA drawCardsGA = new(5);
+        ActionSystem.Instance.AddReaction(drawCardsGA);
     }
 
     // Helpers
