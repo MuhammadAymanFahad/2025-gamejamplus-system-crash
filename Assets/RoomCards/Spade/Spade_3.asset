@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 740c10ac6bf74a74eb2149a51025b338, type: 3}
-  m_Name: Shovel_Ace
+  m_Name: Spade_3
   m_EditorClassIdentifier: 
   suit: 1
-  rank: 14
-  cardSprite: {fileID: 0}
+  rank: 3
+  cardSprite: {fileID: 8897233004432926336, guid: cbd3a477878f0a1468e567cd14b3b812, type: 3}

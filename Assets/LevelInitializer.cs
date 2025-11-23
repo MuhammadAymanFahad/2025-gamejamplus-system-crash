@@ -1,17 +1,19 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class LevelInitializer : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // ❌ DISABLED - Single floor game, no need to initialize new floor
+        // DungeonRoomManager already initializes in its own Start()
+
+        /*
         if (DungeonRoomManager.Instance != null)
         {
             DungeonRoomManager.Instance.InitializeNewFloor();
         }
-        else
-        {
-            Debug.LogError("DungeonRoomManager instance not found in the scene.");
-        }
+        */
+
+        Debug.Log("[LevelInitializer] Disabled - Single floor mode");
     }
 }
