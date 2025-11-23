@@ -21,7 +21,6 @@ public class MusicManager : MonoBehaviour
 
     private void Awake()
     {
-        // Singleton pattern
         if (Instance != null)
         {
             Destroy(gameObject);
@@ -85,6 +84,14 @@ public class MusicManager : MonoBehaviour
 
         activeSource.Stop();
         idleSource.Play();
+    }
+
+    public void PlayMainMenuMusic()
+    {
+        if (!isEnabled) return;
+
+        activeSource.Play();
+        idleSource.Stop();
     }
 
     private IEnumerator CrossfadeRoutine()
