@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-// ✅ Separate test script - can be removed for production
 public class CombatTester : MonoBehaviour
 {
+    [Header("Settings")]
+    public bool autoStartCombat = true; 
+    public float autoStartDelay = 0.5f; 
+
     private CombatManager combatManager;
     private PlayerManager player;
 
@@ -11,11 +14,17 @@ public class CombatTester : MonoBehaviour
     {
         combatManager = CombatManager.Instance;
         player = PlayerManager.Instance;
+
+        // ✅ Auto-start combat if enabled
+        if (autoStartCombat)
+        {
+            Invoke(nameof(TestCombat), autoStartDelay);
+        }
     }
 
     void Update()
     {
-        // Start test combat
+        // Manual trigger (still available)
         if (Input.GetKeyDown(KeyCode.T))
         {
             TestCombat();
@@ -26,42 +35,18 @@ public class CombatTester : MonoBehaviour
         {
             player.EquipWeapon(6);
         }
-
-        // In-combat actions
-        if (combatManager.IsInCombat())
-        {
-            var turnManager = combatManager.GetComponent<TurnManager>();
-
-            if (turnManager.IsPlayerTurn())
-            {
-                // Attack
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    var monsters = turnManager.GetActiveMonsters();
-                    if (monsters.Count > 0)
-                    {
-                        combatManager.PlayerAttack(monsters[0]);
-                    }
-                }
-
-                // Heal
-                if (Input.GetKeyDown(KeyCode.H))
-                {
-                    combatManager.PlayerHeal(6);
-                }
-            }
-        }
     }
 
     void TestCombat()
     {
-        List<CombatCard> testCards = new List<CombatCard> {
-            new CombatCard("Clover", 4),
-            new CombatCard("Spade", 10),
-            new CombatCard("Heart", 5),
-            new CombatCard("Diamond", 6)
+        List<CardTest> testCards = new List<CardTest> {
+            new CardTest("Clover", 4),
+            new CardTest("Spade", 10),
+            new CardTest("Heart", 5),
+            new CardTest("Diamond", 6)
         };
 
+        Debug.Log($"[CombatTester] Starting combat with {testCards.Count} cards");
         combatManager.StartCombat(testCards);
     }
 }

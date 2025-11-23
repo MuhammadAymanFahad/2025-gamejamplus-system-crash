@@ -223,5 +223,4 @@ public class PlayerMovement : MonoBehaviour
             Gizmos.DrawWireSphere(endPoint, 0.1f);
         }
     }
-    
 }

@@ -25,7 +25,7 @@ public class CardView : MonoBehaviour
     private void OnMouseEnter()
     {
         wrapper.SetActive(false);
-        Vector3 pos = new(transform.position.x, -2, 0);
+        Vector3 pos = new(transform.position.x, transform.position.y + 2f, 0);
         CardViewHoverSystem.Instance.Show(Card, pos);
     }
 

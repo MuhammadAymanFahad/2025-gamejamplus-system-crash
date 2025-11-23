@@ -54,9 +54,9 @@ public class CombatManager : MonoBehaviour, ICombatSystem
         // TODO: Trigger Game Over screen
     }
 
-    public void StartCombat(List<CombatCard> roomCards)
+    public void StartCombat(List<CardTest> roomCards)
     {
-        List<CombatCard> monsters = roomCards.FindAll(c => c.isMonster);
+        List<CardTest> monsters = roomCards.FindAll(c => c.isMonster);
 
         if (monsters.Count == 0)
         {
@@ -72,7 +72,7 @@ public class CombatManager : MonoBehaviour, ICombatSystem
         Debug.Log($"=== COMBAT START === {monsters.Count} monsters");
     }
 
-    public void PlayerAttack(CombatCard targetMonster)
+    public void PlayerAttack(CardTest targetMonster)
     {
         if (!inCombat) return;
         if (!turnManager.IsPlayerTurn())

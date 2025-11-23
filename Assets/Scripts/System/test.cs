@@ -4,6 +4,7 @@ public class test : MonoBehaviour
 {
     
     [SerializeField] private HandView handView;
+    [SerializeField] private HolderView holderView;
     [SerializeField] private CardData cardData;
     void Start()
     {
@@ -18,8 +19,16 @@ public class test : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Space))
         {
             Card card = new(cardData);
-            CardView cardView = CardViewCreators.Instance.CreateCardView(card, transform.position, Quaternion.identity);
-            StartCoroutine(handView.AddCard(cardView));
+            if (handView != null)
+            {
+                CardView cardView = CardViewCreators.Instance.CreateCardView(card, transform.position, Quaternion.identity);
+                StartCoroutine(handView.AddCard(cardView));    
+            } else
+            {
+                CardView cardView = CardViewCreators.Instance.CreateCardView(card, transform.position, Quaternion.identity);
+                StartCoroutine(holderView.AddCard(cardView));
+            }
+            
         }
     }
 }
