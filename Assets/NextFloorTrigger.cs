@@ -1,27 +1,30 @@
 using UnityEngine;
 
-public class NextFloorTrigger : MonoBehaviour
+public class BossDefeatedTrigger : MonoBehaviour
 {
-   private void OnTriggerEnter2D(Collider2D other)
-   {
-       if (other.CompareTag("Player"))
-       {
-           DungeonRoomManager manager  = DungeonRoomManager.Instance;
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            // Check if boss is defeated (implement your own logic)
+            bool bossDefeated = CheckBossDefeated();
 
-           if (manager != null)
+            if (bossDefeated)
             {
-                Debug.Log(manager.isHaveKey);
-                if (!manager.isHaveKey)
-                {
-                    Debug.Log("Player cannot proceed to next floor yet");
-                    return;
-                }
-                if (manager.isHaveKey)
-                {
-                    Debug.Log("Player has the key, proceeding to next floor");
-                    manager.OnDungeonComplete();
-                }
+                // End game - return to main menu
+                DungeonRoomManager.Instance.OnDungeonComplete();
             }
-       }
-   }
+            else
+            {
+                Debug.Log("Defeat the boss first!");
+            }
+        }
+    }
+
+    bool CheckBossDefeated()
+    {
+        // TODO: Implement boss check logic
+        // For now, return true for testing
+        return true;
+    }
 }
