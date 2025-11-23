@@ -17,11 +17,11 @@ public class ActionSystem : Singleton<ActionSystem>
     {
        if (isPerforming) return;
        isPerforming = true;
-    //    StartCoroutine(Flow(action, () =>
-    //    {
-    //        isPerforming = false;
-    //        OnPerfomFinished?.Invoke();
-    //    }));
+       StartCoroutine(Flow(action, () =>
+       {
+           isPerforming = false;
+           OnPerfomFinished?.Invoke();
+       }));
     }
     public void AddReaction (GameAction gameAction)
     {
@@ -55,9 +55,11 @@ public class ActionSystem : Singleton<ActionSystem>
     }
     private IEnumerator PerformPerformer (GameAction action)
     {
-        // TODO : Complete it dumbass
         Type type = action.GetType();
-        yield return performers[type](action);
+        if (performers.ContainsKey(type))
+        {
+            yield return performers[type](action);    
+        }
     }
     private void PerformSubscribers(GameAction action, Dictionary<Type, List<Action<GameAction>>> subscribers)
     {
