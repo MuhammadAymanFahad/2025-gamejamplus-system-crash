@@ -18,15 +18,14 @@ public class VolumeSettingController : MonoBehaviour
     {
         AudioListener.volume = value;
         PlayerPrefs.SetFloat("MasterVolume", value);
-        Debug.Log("Master volume changed to: " + value);
     }
 
     // Called when Music checkbox clicked
     public void OnMusicToggled(bool enabled)
     {
         PlayerPrefs.SetInt("MusicEnabled", enabled ? 1 : 0);
-        Debug.Log("Music enabled changed to: " + enabled);
-        // Kalau kamu punya MusicManager → panggil di sini
+        
+        // MusicManager
         // MusicManager.Instance.SetEnabled(enabled);
     }
 
@@ -35,6 +34,7 @@ public class VolumeSettingController : MonoBehaviour
     {
         PlayerPrefs.SetInt("SFXEnabled", enabled ? 1 : 0);
         Debug.Log("SFX enabled changed to: " + enabled);
+        
         // SFXManager 
         // SFXManager.Instance.SetEnabled(enabled);
     }
