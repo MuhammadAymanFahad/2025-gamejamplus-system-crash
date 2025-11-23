@@ -1,0 +1,73 @@
+﻿using System;
+using System.Collections.Generic;
+
+// Temporary Card class (nanti diganti punya Programmer 1)
+public class CombatCard
+{
+    public string suit; // "Heart", "Diamond", "Clover", "Spade"
+    public int grade;   // 2-10, or 15 for boss (IMMUTABLE!)
+
+    // ✅ TAMBAHKAN INI - Runtime data
+    public int currentHP; // Current HP untuk monster (berubah saat combat)
+
+    public bool isMonster => suit == "Clover" || suit == "Spade";
+    public bool isBoss => grade == 15;
+
+    // Constructor helper
+    public CombatCard(string suit, int grade)
+    {
+        this.suit = suit;
+        this.grade = grade;
+        this.currentHP = grade; // ✅ HP awal = grade
+    }
+
+    // Empty constructor (untuk compatibility)
+    public CombatCard()
+    {
+        currentHP = grade;
+    }
+
+    // Method untuk init HP saat masuk combat
+    public void InitializeCombat()
+    {
+        currentHP = grade; // Reset HP = grade
+    }
+}
+
+// Interface untuk Combat System
+public interface ICombatSystem
+{
+    void StartCombat(List<CombatCard> roomCards);
+    void PlayerAttack(CombatCard targetMonster);
+    void EndCombat();
+    bool IsInCombat();
+}
+
+// Interface untuk Player
+public interface IPlayer
+{
+    int CurrentHP { get; }
+    int MaxHP { get; }
+    int WeaponGrade { get; }
+    bool CanFlee { get; }
+    bool IsAlive { get; } // ✅ Already added before
+
+    void TakeDamage(int damage);
+    void Heal(int amount);
+    void EquipWeapon(int grade);
+    void SetCombatState(bool inCombat); // ✅ NEW
+}
+
+// Events untuk komunikasi antar system
+public static class CombatEvents
+{
+    public static event Action<CombatCard> OnMonsterKilled;
+    public static event Action OnPlayerDeath;
+    public static event Action OnCombatEnd;
+    public static event Action<CombatCard> OnBossKilled;
+
+    public static void TriggerMonsterKilled(CombatCard monster) => OnMonsterKilled?.Invoke(monster);
+    public static void TriggerPlayerDeath() => OnPlayerDeath?.Invoke();
+    public static void TriggerCombatEnd() => OnCombatEnd?.Invoke();
+    public static void TriggerBossKilled(CombatCard boss) => OnBossKilled?.Invoke(boss);
+}
