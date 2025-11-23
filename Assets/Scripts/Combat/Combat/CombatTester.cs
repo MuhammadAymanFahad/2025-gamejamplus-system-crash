@@ -39,11 +39,11 @@ public class CombatTester : MonoBehaviour
 
     void TestCombat()
     {
-        List<CombatCard> testCards = new List<CombatCard> {
-            new CombatCard("Clover", 4),
-            new CombatCard("Spade", 10),
-            new CombatCard("Heart", 5),
-            new CombatCard("Diamond", 6)
+        List<CardTest> testCards = new List<CardTest> {
+            new CardTest("Clover", 4),
+            new CardTest("Spade", 10),
+            new CardTest("Heart", 5),
+            new CardTest("Diamond", 6)
         };
 
         Debug.Log($"[CombatTester] Starting combat with {testCards.Count} cards");

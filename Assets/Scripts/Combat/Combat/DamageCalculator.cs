@@ -8,8 +8,8 @@ public static class DamageCalculator
         return weaponGrade > 0 ? weaponGrade : 1;
     }
 
-    // Monster attack damage (reduced by weapon)
-    public static int CalculateMonsterDamage(CombatCard monster, int playerWeaponGrade)
+    // ✅ Monster attack damage - reduced by weapon grade!
+    public static int CalculateMonsterDamage(CardTest monster, int playerWeaponGrade)
     {
         int baseDamage = monster.grade;
         int reducedDamage = baseDamage - playerWeaponGrade;
