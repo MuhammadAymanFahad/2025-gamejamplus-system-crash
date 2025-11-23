@@ -4,6 +4,7 @@ public class test : MonoBehaviour
 {
     
     [SerializeField] private HandView handView;
+    [SerializeField] private CardData cardData;
     void Start()
     {
         // Main logic on how to add the card (VERY IMPORTANT WILL USE LATER)
@@ -16,7 +17,8 @@ public class test : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Space))
         {
-            CardView cardView = CardViewCreators.Instance.CreateCardView(transform.position, Quaternion.identity);
+            Card card = new(cardData);
+            CardView cardView = CardViewCreators.Instance.CreateCardView(card, transform.position, Quaternion.identity);
             StartCoroutine(handView.AddCard(cardView));
         }
     }
