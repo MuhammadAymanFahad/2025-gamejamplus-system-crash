@@ -12,7 +12,7 @@ public class TurnManager : MonoBehaviour
 {
     public TurnPhase currentPhase = TurnPhase.PlayerTurn;
 
-    private List<Card> activeMonsters = new List<Card>();
+    private List<CombatCard> activeMonsters = new List<CombatCard>();
     private PlayerManager player;
 
     void Start()
@@ -20,12 +20,12 @@ public class TurnManager : MonoBehaviour
         player = PlayerManager.Instance;
     }
 
-    public void InitializeCombat(List<Card> monsters)
+    public void InitializeCombat(List<CombatCard> monsters)
     {
-        activeMonsters = new List<Card>(monsters);
+        activeMonsters = new List<CombatCard>(monsters);
 
         // ✅ INITIALIZE HP untuk setiap monster
-        foreach (Card monster in activeMonsters)
+        foreach (CombatCard monster in activeMonsters)
         {
             monster.InitializeCombat(); // currentHP = grade
         }
@@ -34,13 +34,13 @@ public class TurnManager : MonoBehaviour
         Debug.Log($"Combat started! {activeMonsters.Count} monsters");
 
         // Debug info
-        foreach (Card m in activeMonsters)
+        foreach (CombatCard m in activeMonsters)
         {
             Debug.Log($"  - Monster grade {m.grade}, HP: {m.currentHP}");
         }
     }
 
-    public void PlayerAttackMonster(Card targetMonster)
+    public void PlayerAttackMonster(CombatCard targetMonster)
     {
         if (currentPhase != TurnPhase.PlayerTurn)
         {
@@ -48,9 +48,11 @@ public class TurnManager : MonoBehaviour
             return;
         }
 
-        // ✅ Player attacks - KURANGI currentHP, bukan grade!
+        // Player attacks
         int damage = DamageCalculator.CalculatePlayerDamage(player.WeaponGrade);
-        targetMonster.currentHP -= damage;
+
+        // ✅ Use DamageCalculator utility
+        targetMonster.currentHP = DamageCalculator.CalculateRemainingHP(targetMonster.currentHP, damage);
 
         Debug.Log($"Player attacks for {damage}! Monster HP: {targetMonster.currentHP}/{targetMonster.grade}");
 
@@ -66,12 +68,16 @@ public class TurnManager : MonoBehaviour
 
     public void PlayerUsePotion(int potency)
     {
-        if (currentPhase != TurnPhase.PlayerTurn) return;
+        if (currentPhase != TurnPhase.PlayerTurn)
+        {
+            Debug.Log("Not player turn!");
+            return;
+        }
 
         player.Heal(potency);
-        Debug.Log($"Player used potion (grade {potency})");
+        Debug.Log($"Player used potion (grade {potency}) - Turn consumed!");
 
-        // Potion consumes turn
+        // ✅ Potion consumes turn - monsters attack now!
         EndPlayerTurn();
     }
 
@@ -85,12 +91,9 @@ public class TurnManager : MonoBehaviour
     {
         Debug.Log("--- MONSTERS TURN ---");
 
-        foreach (Card monster in activeMonsters)
+        foreach (CombatCard monster in activeMonsters)
         {
-            // ✅ Pass player weapon grade untuk damage reduction
             int damage = DamageCalculator.CalculateMonsterDamage(monster, player.WeaponGrade);
-
-            // Show damage calculation
             int baseDamage = monster.grade;
             int reduction = player.WeaponGrade;
             Debug.Log($"Monster (grade {baseDamage}) attacks! Damage: {baseDamage} - {reduction} = {damage}");
@@ -100,15 +103,15 @@ public class TurnManager : MonoBehaviour
             if (!player.IsAlive)
             {
                 currentPhase = TurnPhase.CombatEnd;
+                CombatEvents.TriggerPlayerDeath();
                 return;
             }
         }
 
-        // Check if combat should end
         if (activeMonsters.Count == 0)
         {
             currentPhase = TurnPhase.CombatEnd;
-            EndCombat();
+            CombatEvents.TriggerCombatEnd();
         }
         else
         {
@@ -117,7 +120,7 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    void OnMonsterKilled(Card monster)
+    void OnMonsterKilled(CombatCard monster)
     {
         Debug.Log($"Monster KILLED! Grade: {monster.grade}, Final HP: {monster.currentHP}");
 
@@ -147,5 +150,5 @@ public class TurnManager : MonoBehaviour
 
     // Getters
     public bool IsPlayerTurn() => currentPhase == TurnPhase.PlayerTurn;
-    public List<Card> GetActiveMonsters() => activeMonsters;
+    public List<CombatCard> GetActiveMonsters() => activeMonsters;
 }
