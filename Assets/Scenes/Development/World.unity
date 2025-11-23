@@ -187,7 +187,7 @@ GameObject:
   - component: {fileID: 43411473}
   - component: {fileID: 43411472}
   m_Layer: 0
-  m_Name: RoomManager
+  m_Name: Dungeon Room Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -207,10 +207,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   totalRegularRooms: 7
   bossRoom: 1
-  combatWeight: 70
-  rewardWeight: 30
+  combatWeight: 50
+  rewardWeight: 50
   mapSceneName: MapScene
-  combatSceneName: CombatScene
+  combatSceneName: Battle
   rewardSceneName: RewardScene
   bossSceneName: BossScene
 --- !u!4 &43411473
@@ -1061,6 +1061,10 @@ PrefabInstance:
     - target: {fileID: 6867486680106891682, guid: eed63157a986fa542ae378c6253cfd0e, type: 3}
       propertyPath: m_Name
       value: RoomExit
+      objectReference: {fileID: 0}
+    - target: {fileID: 8126620775546950059, guid: eed63157a986fa542ae378c6253cfd0e, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

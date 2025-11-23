@@ -8,4 +8,20 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Settings/Scenes/2D URP Scene Template.unity
     guid: 2cda990e2423bbf4892e6590ba056729
+  - enabled: 1
+    path: Assets/Scenes/Development/World.unity
+    guid: d9b5840e956dfb74b9d52c61baf0c957
+  - enabled: 1
+    path: Assets/Scenes/Dungeon Room/BossScene.unity
+    guid: 34cec76b46d9ea24ab170a17698e9339
+  - enabled: 1
+    path: Assets/Scenes/Dungeon Room/RewardScene.unity
+    guid: 3b5129fab38c246448b864dbfbbaa607
+  - enabled: 1
+    path: Assets/Scenes/05_CombatScene.unity
+    guid: 55f58c0888f404341b475d90a817ce57
+  - enabled: 1
+    path: Assets/Scenes/Development/Battle.unity
+    guid: ccfcec598b69cb849bbec84b596ea135
   m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0
