@@ -54,8 +54,6 @@ public class CombatUIManager : MonoBehaviour
         CombatEvents.OnMonsterKilled += OnMonsterKilled;
         CombatEvents.OnCombatEnd += OnCombatEnd;
 
-        // Hide UI initially
-        HideUI();
     }
 
     void OnDestroy()
@@ -85,6 +83,7 @@ public class CombatUIManager : MonoBehaviour
         // Create UI slots for each monster
         foreach (CombatCard monster in monsters)
         {
+            Debug.Log($"Creating UI slot for monster grade {monster.grade}");
             CreateMonsterSlot(monster);
         }
 

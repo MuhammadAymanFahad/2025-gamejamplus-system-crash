@@ -433,7 +433,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 145.24847, y: -189.3482}
-  m_SizeDelta: {x: 4, y: 500}
+  m_SizeDelta: {x: 400, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1366799649032872763
 CanvasRenderer:
@@ -485,6 +485,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: def79079060661246a504b322d5bb243, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  monsterInfoText: {fileID: 0}
-  attackButton: {fileID: 0}
+  monsterInfoText: {fileID: 8672699203034755116}
+  attackButton: {fileID: 3737297412821366991}
   monsterIcon: {fileID: 0}
