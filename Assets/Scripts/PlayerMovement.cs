@@ -1,18 +1,9 @@
 using UnityEngine;
 using System.Collections;
 
-/// <summary>
-/// Handles grid-based player movement with smooth interpolation.
-/// Detects RoomExit triggers using Unity's OnTriggerEnter2D system.
-/// 
-/// Requirements:
-/// - Rigidbody2D (Kinematic, Gravity Scale = 0)
-/// - Player tag assigned to GameObject
-/// - DungeonRoomManager present in scene
-/// </summary>
-public class PlayerMovementTriggerBased : MonoBehaviour
+
+public class PlayerMovement : MonoBehaviour
 {
-    #region Inspector Fields
     
     [Header("Movement Settings")]
     [Tooltip("Size of one grid cell in Unity units")]
@@ -21,18 +12,21 @@ public class PlayerMovementTriggerBased : MonoBehaviour
     [Tooltip("Movement speed in tiles per second")]
     [SerializeField] private float moveSpeed = 5f;
     
-    #endregion
+    [Header("Collision Detection")]
+    [Tooltip("Layer mask for obstacles (walls, tilemap obstacles)")]
+    [SerializeField] private LayerMask obstacleLayer;
     
-    #region Private Fields
+    [Tooltip("Distance to raycast for obstacle detection")]
+    [SerializeField] private float raycastDistance = 1.2f;
+    
+    [Tooltip("Show debug rays in Scene view")]
+    [SerializeField] private bool showDebugRays = true;
+    
     
     private DungeonRoomManager roomManager;
     private Vector3 targetPos;
     private bool isMoving = false;
-    
-    #endregion
-    
-    #region Unity Lifecycle
-    
+
     void Start()
     {
         // Find room manager in scene
@@ -55,13 +49,7 @@ public class PlayerMovementTriggerBased : MonoBehaviour
         }
     }
     
-    #endregion
-    
-    #region Movement Logic
-    
-    /// <summary>
     /// Processes WASD input and initiates movement
-    /// </summary>
     private void HandleInput()
     {
         Vector3 direction = Vector3.zero;
@@ -89,19 +77,42 @@ public class PlayerMovementTriggerBased : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Initiates movement in specified direction
-    /// </summary>
-    /// <param name="direction">Normalized direction vector</param>
+    /// Checks for obstacles using raycast before allowing movement
     private void Move(Vector3 direction)
     {
-        targetPos += direction * gridSize;
-        StartCoroutine(SmoothMove());
+        // Check if the target direction is blocked by an obstacle
+        if (!IsDirectionBlocked(direction))
+        {
+            targetPos += direction * gridSize;
+            StartCoroutine(SmoothMove());
+        }
+        // If blocked, player simply doesn't move (no error, no feedback)
+    }
+    
+    /// Checks if movement in a direction is blocked by an obstacle
+    /// Uses Physics2D.Raycast to detect collisions
+    private bool IsDirectionBlocked(Vector3 direction)
+    {
+        // Cast ray from player position in the given direction
+        RaycastHit2D hit = Physics2D.Raycast(
+            transform.position,      // Start from player position
+            direction,               // Direction to check
+            raycastDistance,         // Distance to check
+            obstacleLayer            // Only check obstacle layer
+        );
+        
+        // Draw debug ray for visualization
+        if (showDebugRays)
+        {
+            Color rayColor = hit.collider != null ? Color.red : Color.green;
+            Debug.DrawRay(transform.position, direction * raycastDistance, rayColor, 0.1f);
+        }
+        
+        // Return true if something was hit (blocked)
+        return hit.collider != null;
     }
 
-    /// <summary>
     /// Smoothly interpolates player position to target over time
-    /// </summary>
     private IEnumerator SmoothMove()
     {
         isMoving = true;
@@ -122,10 +133,8 @@ public class PlayerMovementTriggerBased : MonoBehaviour
         isMoving = false;
     }
 
-    /// <summary>
     /// Snaps player position to nearest grid point
     /// Called on Start to ensure proper grid alignment
-    /// </summary>
     private void SnapToGrid()
     {
         float x = Mathf.Round(transform.position.x / gridSize) * gridSize;
@@ -134,15 +143,9 @@ public class PlayerMovementTriggerBased : MonoBehaviour
         targetPos = transform.position;
     }
     
-    #endregion
-    
-    #region Trigger Detection
-    
-    /// <summary>
+
     /// Called when player collider enters a trigger collider
     /// Detects RoomExit and initiates scene transition
-    /// </summary>
-    /// <param name="other">The collider that was entered</param>
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("RoomExit"))
@@ -154,13 +157,7 @@ public class PlayerMovementTriggerBased : MonoBehaviour
         }
     }
     
-    #endregion
-    
-    #region Validation
-    
-    /// <summary>
     /// Validates Rigidbody2D component and auto-configures if needed
-    /// </summary>
     private void ValidateRigidbody()
     {
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
@@ -187,5 +184,43 @@ public class PlayerMovementTriggerBased : MonoBehaviour
         }
     }
     
-    #endregion
-} 
+    
+    /// Draws visual debugging aids in Scene view
+    /// Shows raycast directions and their collision status
+    void OnDrawGizmos()
+    {
+        if (!Application.isPlaying) return;
+        
+        // Draw current position marker
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, 0.3f);
+        
+        // Draw target position marker
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(targetPos, Vector3.one * gridSize * 0.9f);
+        
+        // Draw raycasts in all 4 directions
+        Vector2[] directions = { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
+        
+        foreach (Vector2 dir in directions)
+        {
+            // Check if direction is blocked
+            RaycastHit2D hit = Physics2D.Raycast(
+                transform.position,
+                dir,
+                raycastDistance,
+                obstacleLayer
+            );
+            
+            // Green if clear, red if blocked
+            Gizmos.color = hit.collider != null ? new Color(1, 0, 0, 0.5f) : new Color(0, 1, 0, 0.5f);
+            
+            // Draw line
+            Vector3 endPoint = transform.position + (Vector3)dir * raycastDistance;
+            Gizmos.DrawLine(transform.position, endPoint);
+            
+            // Draw endpoint marker
+            Gizmos.DrawWireSphere(endPoint, 0.1f);
+        }
+    }
+}
