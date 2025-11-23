@@ -18,7 +18,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Development/World_2.unity
     guid: c2dcf1a011301564bbd351c6cba62d84
   - enabled: 1
-    path: Assets/Scenes/Development/Battle.unity
+    path: Assets/Scenes/Development/CardViewScene.unity
     guid: e506bd4116a263142b584db7fd8cbe02
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

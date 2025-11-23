@@ -2,37 +2,37 @@
 using System.Collections.Generic;
 
 // Temporary Card class (nanti diganti punya Programmer 1)
-    public class CombatCard 
+public class CombatCard
+{
+    public string suit; // "Heart", "Diamond", "Clover", "Spade"
+    public int grade;   // 2-10, or 15 for boss (IMMUTABLE!)
+
+    // ✅ TAMBAHKAN INI - Runtime data
+    public int currentHP; // Current HP untuk monster (berubah saat combat)
+
+    public bool isMonster => suit == "Clover" || suit == "Spade";
+    public bool isBoss => grade == 15;
+
+    // Constructor helper
+    public CombatCard(string suit, int grade)
     {
-        public string suit; // "Heart", "Diamond", "Clover", "Spade"
-        public int grade;   // 2-10, or 15 for boss (IMMUTABLE!)
-
-        // ✅ TAMBAHKAN INI - Runtime data
-        public int currentHP; // Current HP untuk monster (berubah saat combat)
-
-        public bool isMonster => suit == "Clover" || suit == "Spade";
-        public bool isBoss => grade == 15;
-
-        // Constructor helper
-        public CombatCard(string suit, int grade)
-        {
-            this.suit = suit;
-            this.grade = grade;
-            this.currentHP = grade; // ✅ HP awal = grade
-        }
-
-        // Empty constructor (untuk compatibility)
-        public CombatCard()
-        {
-            currentHP = grade;
-        }
-
-        // Method untuk init HP saat masuk combat
-        public void InitializeCombat()
-        {
-            currentHP = grade; // Reset HP = grade
-        }
+        this.suit = suit;
+        this.grade = grade;
+        this.currentHP = grade; // ✅ HP awal = grade
     }
+
+    // Empty constructor (untuk compatibility)
+    public CombatCard()
+    {
+        currentHP = grade;
+    }
+
+    // Method untuk init HP saat masuk combat
+    public void InitializeCombat()
+    {
+        currentHP = grade; // Reset HP = grade
+    }
+}
 
 // Interface untuk Combat System
 public interface ICombatSystem

@@ -68,6 +68,7 @@ public class CombatManager : MonoBehaviour, ICombatSystem
         player.SetCombatState(true); // ✅ Use interface method
 
         turnManager.InitializeCombat(monsters);
+        CombatUIManager.Instance.ShowCombat(monsters);
 
         Debug.Log($"=== COMBAT START === {monsters.Count} monsters");
     }
