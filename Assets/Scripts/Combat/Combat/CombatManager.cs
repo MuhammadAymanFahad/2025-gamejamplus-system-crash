@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CombatManager : MonoBehaviour, ICombatSystem
@@ -7,6 +8,7 @@ public class CombatManager : MonoBehaviour, ICombatSystem
 
     private TurnManager turnManager;
     private PlayerManager player;
+    private CombatUIManager combatUI; // ✅ NEW
     private bool inCombat = false;
 
     void Awake()
@@ -25,6 +27,7 @@ public class CombatManager : MonoBehaviour, ICombatSystem
     void Start()
     {
         player = PlayerManager.Instance;
+        combatUI = CombatUIManager.Instance; // ✅ NEW
 
         CombatEvents.OnCombatEnd += HandleCombatEnd;
         CombatEvents.OnPlayerDeath += HandlePlayerDeath;
@@ -32,26 +35,8 @@ public class CombatManager : MonoBehaviour, ICombatSystem
 
     void OnDestroy()
     {
-        // ✅ Unsubscribe to prevent memory leaks
         CombatEvents.OnCombatEnd -= HandleCombatEnd;
         CombatEvents.OnPlayerDeath -= HandlePlayerDeath;
-    }
-
-    void HandleCombatEnd()
-    {
-        if (!inCombat) return;
-
-        Debug.Log("=== COMBAT END - VICTORY ===");
-        EndCombat();
-    }
-
-    void HandlePlayerDeath()
-    {
-        if (!inCombat) return;
-
-        Debug.Log("=== COMBAT END - DEFEAT ===");
-        EndCombat();
-        // TODO: Trigger Game Over screen
     }
 
     public void StartCombat(List<CombatCard> roomCards)
@@ -65,9 +50,15 @@ public class CombatManager : MonoBehaviour, ICombatSystem
         }
 
         inCombat = true;
-        player.SetCombatState(true); // ✅ Use interface method
+        player.SetCombatState(true);
 
         turnManager.InitializeCombat(monsters);
+
+        // ✅ Show UI with monsters
+        if (combatUI != null)
+        {
+            combatUI.ShowCombat(monsters);
+        }
 
         Debug.Log($"=== COMBAT START === {monsters.Count} monsters");
     }
@@ -84,12 +75,10 @@ public class CombatManager : MonoBehaviour, ICombatSystem
         turnManager.PlayerAttackMonster(targetMonster);
     }
 
-    // ✅ NEW: Public method untuk heal (consumes turn)
     public void PlayerHeal(int potency)
     {
         if (!inCombat)
         {
-            // Heal outside combat (no turn consumed)
             player.Heal(potency);
             return;
         }
@@ -100,14 +89,29 @@ public class CombatManager : MonoBehaviour, ICombatSystem
             return;
         }
 
-        // Heal in combat (consumes turn)
         turnManager.PlayerUsePotion(potency);
+    }
+
+    void HandleCombatEnd()
+    {
+        if (!inCombat) return;
+
+        Debug.Log("=== COMBAT END - VICTORY ===");
+        EndCombat();
+    }
+
+    void HandlePlayerDeath()
+    {
+        if (!inCombat) return;
+
+        Debug.Log("=== COMBAT END - DEFEAT ===");
+        EndCombat();
     }
 
     public void EndCombat()
     {
         inCombat = false;
-        player.SetCombatState(false); // ✅ Use method instead of direct access
+        player.SetCombatState(false);
         Debug.Log("Combat system cleaned up!");
     }
 
