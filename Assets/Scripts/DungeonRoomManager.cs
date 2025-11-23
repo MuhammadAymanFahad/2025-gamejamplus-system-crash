@@ -16,7 +16,7 @@ public class DungeonRoomManager : MonoBehaviour
 
     [Header("Scene References")]
     [Tooltip("Name of the map/exploration scene")]
-    public string mapSceneName = "MapScene";
+    [SerializeField] private string mapSceneName ;
     
     [Tooltip("Name of the combat encounter scene")]
     public string combatSceneName = "CombatScene";
