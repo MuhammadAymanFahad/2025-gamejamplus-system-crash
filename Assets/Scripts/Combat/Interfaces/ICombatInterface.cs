@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 // Temporary Card class (nanti diganti punya Programmer 1)
-public class Card
+public class CombatCard
 {
     public string suit; // "Heart", "Diamond", "Clover", "Spade"
     public int grade;   // 2-10, or 15 for boss (IMMUTABLE!)
@@ -14,7 +14,7 @@ public class Card
     public bool isBoss => grade == 15;
 
     // Constructor helper
-    public Card(string suit, int grade)
+    public CombatCard(string suit, int grade)
     {
         this.suit = suit;
         this.grade = grade;
@@ -22,7 +22,7 @@ public class Card
     }
 
     // Empty constructor (untuk compatibility)
-    public Card()
+    public CombatCard()
     {
         currentHP = grade;
     }
@@ -37,8 +37,8 @@ public class Card
 // Interface untuk Combat System
 public interface ICombatSystem
 {
-    void StartCombat(List<Card> roomCards);
-    void PlayerAttack(Card targetMonster);
+    void StartCombat(List<CombatCard> roomCards);
+    void PlayerAttack(CombatCard targetMonster);
     void EndCombat();
     bool IsInCombat();
 }
@@ -61,13 +61,13 @@ public interface IPlayer
 // Events untuk komunikasi antar system
 public static class CombatEvents
 {
-    public static event Action<Card> OnMonsterKilled;
+    public static event Action<CombatCard> OnMonsterKilled;
     public static event Action OnPlayerDeath;
     public static event Action OnCombatEnd;
-    public static event Action<Card> OnBossKilled;
+    public static event Action<CombatCard> OnBossKilled;
 
-    public static void TriggerMonsterKilled(Card monster) => OnMonsterKilled?.Invoke(monster);
+    public static void TriggerMonsterKilled(CombatCard monster) => OnMonsterKilled?.Invoke(monster);
     public static void TriggerPlayerDeath() => OnPlayerDeath?.Invoke();
     public static void TriggerCombatEnd() => OnCombatEnd?.Invoke();
-    public static void TriggerBossKilled(Card boss) => OnBossKilled?.Invoke(boss);
+    public static void TriggerBossKilled(CombatCard boss) => OnBossKilled?.Invoke(boss);
 }

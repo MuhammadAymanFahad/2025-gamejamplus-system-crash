@@ -55,11 +55,11 @@ public class CombatTester : MonoBehaviour
 
     void TestCombat()
     {
-        List<Card> testCards = new List<Card> {
-            new Card("Clover", 4),
-            new Card("Spade", 10),
-            new Card("Heart", 5),
-            new Card("Diamond", 6)
+        List<CombatCard> testCards = new List<CombatCard> {
+            new CombatCard("Clover", 4),
+            new CombatCard("Spade", 10),
+            new CombatCard("Heart", 5),
+            new CombatCard("Diamond", 6)
         };
 
         combatManager.StartCombat(testCards);
