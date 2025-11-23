@@ -2,15 +2,9 @@ using UnityEngine;
 
 public class DrawCardsGA : GameAction
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public int Amount { get; set; }
+    public DrawCardsGA(int amount)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        Amount = amount;
     }
 }
