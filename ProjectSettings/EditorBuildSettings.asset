@@ -18,7 +18,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Development/World_2.unity
     guid: c2dcf1a011301564bbd351c6cba62d84
   - enabled: 1
-    path: Assets/Scenes/Development/Battle.unity
-    guid: e506bd4116a263142b584db7fd8cbe02
+    path: Assets/Scenes/05_CombatScene.unity
+    guid: 55f58c0888f404341b475d90a817ce57
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
