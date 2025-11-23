@@ -22,7 +22,8 @@ public class PlayerMovement : MonoBehaviour
     [Tooltip("Show debug rays in Scene view")]
     [SerializeField] private bool showDebugRays = true;
     
-    
+    public Animator anim;
+    private SpriteRenderer spriteRenderer;
     private DungeonRoomManager roomManager;
     private Vector3 targetPos;
     private bool isMoving = false;
@@ -31,6 +32,12 @@ public class PlayerMovement : MonoBehaviour
     {
         // Find room manager in scene
         roomManager = FindFirstObjectByType<DungeonRoomManager>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+
+        if (spriteRenderer == null)
+        {
+            Debug.LogError("[PlayerMovement] SpriteRenderer component missing from player GameObject.", this);
+        }
         
         // Validate and setup Rigidbody2D
         ValidateRigidbody();
@@ -47,6 +54,7 @@ public class PlayerMovement : MonoBehaviour
         {
             HandleInput();
         }
+        Animate();
     }
     
     /// Processes WASD input and initiates movement
@@ -74,6 +82,29 @@ public class PlayerMovement : MonoBehaviour
         if (direction != Vector3.zero)
         {
             Move(direction);
+        }
+    }
+
+    private void Animate()
+    {
+        if (anim == null) return;
+
+        anim.SetBool("isMoving", isMoving);
+
+        if(isMoving)
+        {
+            Vector3 moveDirection = (targetPos - transform.position).normalized;
+            anim.SetFloat("Horizontal", moveDirection.x);
+            anim.SetFloat("Vertical", moveDirection.y);
+
+            if (moveDirection.x < 0)
+            {
+                spriteRenderer.flipX = true;
+            }
+            else if (moveDirection.x > 0)
+            {
+                spriteRenderer.flipX = false;
+            }
         }
     }
     
