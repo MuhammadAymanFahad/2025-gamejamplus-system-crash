@@ -218,13 +218,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   totalRegularRooms: 7
-  currentLevelIndex: 1
   bossRoom: 1
-  isHaveKey: 0
   mapSceneName: MapScene
   combatSceneName: 05_CombatScene
   bossSceneName: BossScene
-  nextFloorSceneName: World_2
   mainMenuSceneName: 01_MainMenu
 --- !u!4 &43411473
 Transform:
@@ -238,7 +235,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 509242391}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &49161948
@@ -718,6 +716,68 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1001 &509242390
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 43411473}
+    m_Modifications:
+    - target: {fileID: 2034302016819327439, guid: ea7e822245075f142beaf068c74ecf34, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.8475707
+      objectReference: {fileID: 0}
+    - target: {fileID: 2034302016819327439, guid: ea7e822245075f142beaf068c74ecf34, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -2.2448125
+      objectReference: {fileID: 0}
+    - target: {fileID: 2034302016819327439, guid: ea7e822245075f142beaf068c74ecf34, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.0042483215
+      objectReference: {fileID: 0}
+    - target: {fileID: 2034302016819327439, guid: ea7e822245075f142beaf068c74ecf34, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2034302016819327439, guid: ea7e822245075f142beaf068c74ecf34, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2034302016819327439, guid: ea7e822245075f142beaf068c74ecf34, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2034302016819327439, guid: ea7e822245075f142beaf068c74ecf34, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2034302016819327439, guid: ea7e822245075f142beaf068c74ecf34, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2034302016819327439, guid: ea7e822245075f142beaf068c74ecf34, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2034302016819327439, guid: ea7e822245075f142beaf068c74ecf34, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7645240622101481825, guid: ea7e822245075f142beaf068c74ecf34, type: 3}
+      propertyPath: m_Name
+      value: RoomDeckManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ea7e822245075f142beaf068c74ecf34, type: 3}
+--- !u!4 &509242391 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2034302016819327439, guid: ea7e822245075f142beaf068c74ecf34, type: 3}
+  m_PrefabInstance: {fileID: 509242390}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &645015453
 GameObject:
   m_ObjectHideFlags: 0

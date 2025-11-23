@@ -8,10 +8,10 @@ public class RoomCardData : ScriptableObject
     public Sprite cardSprite;
 
     public int Grade => rank;
-    public bool IsMonster => suit == CardSuit.Clover || suit == CardSuit.Shovel;
+    public bool IsMonster => suit == CardSuit.Clover || suit == CardSuit.Spade;
     public bool IsPotion => suit == CardSuit.Heart;
     public bool IsWeapon => suit == CardSuit.Diamond;
     public bool IsBoss => rank == 14 && IsMonster;
 }
 
-public enum CardSuit { Clover, Shovel, Heart, Diamond }
+public enum CardSuit { Clover, Spade, Heart, Diamond }
