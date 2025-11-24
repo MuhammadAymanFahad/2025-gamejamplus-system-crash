@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // or using UnityEngine.UI for Text
+using TMPro;
 
 public class CombatUIManager : MonoBehaviour
 {
@@ -12,31 +12,25 @@ public class CombatUIManager : MonoBehaviour
     public TextMeshProUGUI weaponText;
     public TextMeshProUGUI turnIndicatorText;
 
-    [Header("Monsters Panel")]
-    public Transform monstersContainer;
-    public GameObject monsterSlotPrefab;
+    [Header("Room Cards Panel")]
+    public Transform roomCardsContainer; // Container for ALL 3 cards
+    public GameObject roomCardSlotPrefab;
 
     [Header("Action Buttons")]
-    public Button usePotionButton;
-    public Button discardWeaponButton;
     public Button fleeButton;
 
     // Runtime data
-    private List<MonsterUISlot> monsterSlots = new List<MonsterUISlot>();
+    private List<RoomCardUISlot> roomCardSlots = new List<RoomCardUISlot>();
+    private List<CombatCard> currentRoomCards = new List<CombatCard>();
+
     private CombatManager combatManager;
     private PlayerManager player;
     private TurnManager turnManager;
 
     void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
     }
 
     void Start()
@@ -46,20 +40,19 @@ public class CombatUIManager : MonoBehaviour
         turnManager = combatManager.GetComponent<TurnManager>();
 
         // Setup button listeners
-        usePotionButton.onClick.AddListener(OnUsePotionClicked);
-        //discardWeaponButton.onClick.AddListener(OnDiscardWeaponClicked);
         fleeButton.onClick.AddListener(OnFleeClicked);
 
         // Subscribe to events
-        CombatEvents.OnMonsterKilled += OnMonsterKilled;
         CombatEvents.OnCombatEnd += OnCombatEnd;
-
+        CombatEvents.OnMonsterKilled += OnMonsterKilled; // <-- ADDED
+        CombatEvents.OnBossKilled += OnBossKilled;       // <-- ADDED (optional)
     }
 
     void OnDestroy()
     {
-        CombatEvents.OnMonsterKilled -= OnMonsterKilled;
         CombatEvents.OnCombatEnd -= OnCombatEnd;
+        CombatEvents.OnMonsterKilled -= OnMonsterKilled; // <-- ADDED
+        CombatEvents.OnBossKilled -= OnBossKilled;       // <-- ADDED
     }
 
     void Update()
@@ -68,47 +61,133 @@ public class CombatUIManager : MonoBehaviour
         {
             UpdatePlayerStats();
             UpdateTurnIndicator();
-            UpdateActionButtons();
+            //UpdateActionButtons();
         }
     }
 
-    // ✅ Called by CombatManager when combat starts
-    public void ShowCombat(List<CombatCard> monsters)
+    public void ShowCombat(List<CombatCard> roomCards)
     {
+        Debug.Log($"[CombatUI] ===== ShowCombat CALLED ===== with {roomCards.Count} cards");
+
         gameObject.SetActive(true);
+        currentRoomCards = roomCards;
 
-        // Clear old monster slots
-        ClearMonsterSlots();
+        ClearCardSlots();
 
-        // Create UI slots for each monster
-        foreach (CombatCard monster in monsters)
+        foreach (CombatCard card in roomCards)
         {
-            Debug.Log($"Creating UI slot for monster grade {monster.grade}");
-            CreateMonsterSlot(monster);
+            CreateCardSlot(card);
         }
 
         UpdatePlayerStats();
         UpdateTurnIndicator();
+
+        Debug.Log("[CombatUI] ===== ShowCombat COMPLETE =====");
     }
 
-    void CreateMonsterSlot(CombatCard monster)
+    void CreateCardSlot(CombatCard card)
     {
-        GameObject slotObj = Instantiate(monsterSlotPrefab, monstersContainer);
-        MonsterUISlot slot = slotObj.GetComponent<MonsterUISlot>();
-        slot.Initialize(monster, OnMonsterAttackClicked);
-        monsterSlots.Add(slot);
-    }
-
-    void ClearMonsterSlots()
-    {
-        foreach (var slot in monsterSlots)
+        if (roomCardSlotPrefab == null || roomCardsContainer == null)
         {
-            Destroy(slot.gameObject);
+            Debug.LogError("[CombatUI] Prefab or container NULL!");
+            return;
         }
-        monsterSlots.Clear();
+
+        GameObject slotObj = Instantiate(roomCardSlotPrefab, roomCardsContainer);
+        RoomCardUISlot slot = slotObj.GetComponent<RoomCardUISlot>();
+        if (slot == null)
+        {
+            Debug.LogError("[CombatUI] RoomCardUISlot component not found!");
+            Destroy(slotObj);
+            return;
+        }
+
+        slot.Initialize(card, OnCardClicked);
+        roomCardSlots.Add(slot);
     }
 
-    // ✅ Update player stats display
+    void ClearCardSlots()
+    {
+        foreach (var slot in roomCardSlots) Destroy(slot.gameObject);
+        roomCardSlots.Clear();
+    }
+
+    void OnCardClicked(CombatCard card)
+    {
+        if (!turnManager.IsPlayerTurn())
+        {
+            Debug.Log("[CombatUI] Not player's turn!");
+            return;
+        }
+
+        Debug.Log($"[CombatUI] Card clicked: {card.suit} {card.grade}");
+
+        if (card.isMonster)
+        {
+            combatManager.PlayerAttack(card);
+            UpdateCardSlots();
+        }
+        else if (card.suit == "Heart")
+        {
+            combatManager.PlayerHeal(card.grade);
+            RemoveUsedCard(card);
+        }
+        else if (card.suit == "Diamond")
+        {
+            player.EquipWeapon(card.grade);
+            RemoveUsedCard(card);
+        }
+    }
+
+    // Robust Remove: try reference match first, fallback to logical match (suit+grade + hp <= 0)
+    void RemoveUsedCard(CombatCard card)
+    {
+        RoomCardUISlot slotToRemove = null;
+
+        if (card != null)
+            slotToRemove = roomCardSlots.Find(s => s.GetCard() == card);
+
+        if (slotToRemove == null && card != null)
+        {
+            // Fallback: match by suit+grade and low HP (useful for monsters)
+            slotToRemove = roomCardSlots.Find(s =>
+            {
+                var c = s.GetCard();
+                if (c == null) return false;
+                // If reference didn't match, use identity + hp state
+                if (c.suit == card.suit && c.grade == card.grade)
+                {
+                    // if monster, prefer hp <= 0; for non-monsters we can remove anyway
+                    if (c.isMonster) return c.currentHP <= 0;
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        if (slotToRemove != null)
+        {
+            roomCardSlots.Remove(slotToRemove);
+            Destroy(slotToRemove.gameObject);
+            Debug.Log($"[CombatUI] Removed card from UI: {card.suit} {card.grade}");
+        }
+        else
+        {
+            Debug.LogWarning($"[CombatUI] Tried to remove card but slot not found: {card?.suit} {card?.grade}");
+        }
+
+        // Remove from current cards list as well (safe-remove)
+        if (card != null)
+        {
+            currentRoomCards.RemoveAll(c => c == card || (c.suit == card.suit && c.grade == card.grade && c.currentHP <= 0));
+        }
+    }
+
+    void UpdateCardSlots()
+    {
+        foreach (var slot in roomCardSlots) slot.UpdateHP();
+    }
+
     void UpdatePlayerStats()
     {
         float hpPercent = (float)player.CurrentHP / player.MaxHP;
@@ -123,7 +202,6 @@ public class CombatUIManager : MonoBehaviour
 
         if (player.WeaponGrade > 0)
         {
-            var stats = player.GetComponent<PlayerStats>();
             weaponText.text = $"Weapon: Grade {player.WeaponGrade}";
             weaponText.color = Color.cyan;
         }
@@ -148,49 +226,19 @@ public class CombatUIManager : MonoBehaviour
         }
     }
 
-    void UpdateActionButtons()
+    // Event handler: monster died
+    void OnMonsterKilled(CombatCard monster)
     {
-        bool isPlayerTurn = turnManager.IsPlayerTurn();
-
-        // Enable buttons only during player turn
-        usePotionButton.interactable = isPlayerTurn;
-        //discardWeaponButton.interactable = isPlayerTurn && player.WeaponGrade > 0;
-        fleeButton.interactable = isPlayerTurn && player.CanFlee;
-
-        // Update monster attack buttons
-        foreach (var slot in monsterSlots)
-        {
-            slot.SetAttackButtonInteractable(isPlayerTurn);
-        }
+        Debug.Log($"[CombatUI] OnMonsterKilled received for {monster.suit} {monster.grade}");
+        RemoveUsedCard(monster);
+        UpdateCardSlots();
     }
 
-    // ✅ Button callbacks
-    void OnMonsterAttackClicked(CombatCard monster)
+    // Event handler: boss died (optional behaviour - remove boss and optionally clear floor)
+    void OnBossKilled(CombatCard boss)
     {
-        if (!turnManager.IsPlayerTurn()) return;
-
-        Debug.Log($"Attacking monster grade {monster.grade}");
-        combatManager.PlayerAttack(monster);
-
-        // Update monster UI after attack
-        UpdateMonsterSlots();
-    }
-
-    void OnUsePotionClicked()
-    {
-        if (!turnManager.IsPlayerTurn()) return;
-
-        // TODO: Show potion selection UI
-        // For now, use fixed value
-        combatManager.PlayerHeal(5);
-    }
-
-    void OnDiscardWeaponClicked()
-    {
-        if (!turnManager.IsPlayerTurn()) return;
-
-        player.DiscardWeapon();
-        UpdatePlayerStats();
+        Debug.Log($"[CombatUI] OnBossKilled received for {boss.suit} {boss.grade}");
+        RemoveUsedCard(boss);
     }
 
     void OnFleeClicked()
@@ -199,13 +247,6 @@ public class CombatUIManager : MonoBehaviour
 
         player.Flee();
         HideUI();
-        // TODO: Trigger return to floor scene
-    }
-
-    // ✅ Event handlers
-    void OnMonsterKilled(CombatCard monster)
-    {
-        UpdateMonsterSlots();
     }
 
     void OnCombatEnd()
@@ -213,29 +254,8 @@ public class CombatUIManager : MonoBehaviour
         HideUI();
     }
 
-    void UpdateMonsterSlots()
-    {
-        var activeMonsters = turnManager.GetActiveMonsters();
-
-        // Remove dead monsters from UI
-        for (int i = monsterSlots.Count - 1; i >= 0; i--)
-        {
-            if (!activeMonsters.Contains(monsterSlots[i].Monster))
-            {
-                Destroy(monsterSlots[i].gameObject);
-                monsterSlots.RemoveAt(i);
-            }
-            else
-            {
-                monsterSlots[i].UpdateDisplay();
-            }
-        }
-    }
-
     void HideUI()
     {
         gameObject.SetActive(false);
     }
-
-
 }

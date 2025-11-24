@@ -4,7 +4,7 @@ using UnityEngine;
 public class CombatTester : MonoBehaviour
 {
     [Header("Settings")]
-    public bool autoStartCombat = true; 
+    public bool autoStartCombat = false; 
     public float autoStartDelay = 0.5f; 
 
     private CombatManager combatManager;

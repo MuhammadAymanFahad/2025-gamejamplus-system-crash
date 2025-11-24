@@ -32,7 +32,6 @@ public class CombatManager : MonoBehaviour, ICombatSystem
 
     void OnDestroy()
     {
-        // ✅ Unsubscribe to prevent memory leaks
         CombatEvents.OnCombatEnd -= HandleCombatEnd;
         CombatEvents.OnPlayerDeath -= HandlePlayerDeath;
     }
@@ -56,21 +55,40 @@ public class CombatManager : MonoBehaviour, ICombatSystem
 
     public void StartCombat(List<CombatCard> roomCards)
     {
-        List<CombatCard> monsters = roomCards.FindAll(c => c.isMonster);
+        Debug.Log($"[CombatManager] ===== StartCombat CALLED ===== Received {roomCards?.Count ?? 0} cards");
 
-        if (monsters.Count == 0)
+        if (roomCards == null || roomCards.Count == 0)
         {
-            Debug.Log("No monsters in room!");
+            Debug.LogError("[CombatManager] No room cards!");
             return;
         }
 
+        foreach (var card in roomCards)
+        {
+            Debug.Log($"  - {card.suit} {card.grade} (Monster: {card.isMonster})");
+        }
+
         inCombat = true;
-        player.SetCombatState(true); // ✅ Use interface method
+        player.SetCombatState(true);
 
-        turnManager.InitializeCombat(monsters);
-        CombatUIManager.Instance.ShowCombat(monsters);
+        List<CombatCard> monsters = roomCards.FindAll(c => c.isMonster);
+        if (monsters.Count > 0)
+        {
+            Debug.Log($"[CombatManager] Initializing turn manager with {monsters.Count} monsters");
+            turnManager.InitializeCombat(monsters);
+        }
+        else
+        {
+            Debug.Log("[CombatManager] No monsters - treasure room!");
+        }
 
-        Debug.Log($"=== COMBAT START === {monsters.Count} monsters");
+        if (CombatUIManager.Instance != null)
+        {
+            Debug.Log($"[CombatManager] Showing ALL {roomCards.Count} cards in UI");
+            CombatUIManager.Instance.ShowCombat(roomCards); // Pass ALL cards!
+        }
+
+        Debug.Log("[CombatManager] ===== COMBAT START COMPLETE =====");
     }
 
     public void PlayerAttack(CombatCard targetMonster)
