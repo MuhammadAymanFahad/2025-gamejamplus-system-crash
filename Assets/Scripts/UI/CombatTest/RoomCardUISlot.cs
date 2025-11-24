@@ -5,30 +5,38 @@ using TMPro;
 using System;
 
 /// <summary>
-/// Ultra-clean card UI - click directly on card image
-/// Shows sprite + HP (monsters only)
-/// Optional glow on hover for visual feedback
+/// Card UI slot - displays card sprite with type label and HP (for monsters)
+/// Click directly on card to interact
 /// </summary>
 public class RoomCardUISlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Essential UI")]
-    public Image cardImage; // Main card visual (MUST HAVE)
-    public TextMeshProUGUI hpText; // Only shown for monsters
+    [Tooltip("Main card image - displays sprite from RoomCardData")]
+    public Image cardImage;
+
+    [Tooltip("Type label above/on card (MONSTER/HEAL/WEAPON)")]
+    public TextMeshProUGUI typeText;
+
+    [Tooltip("HP display - only shown for monsters")]
+    public TextMeshProUGUI hpText;
 
     [Header("Optional Visual Feedback")]
-    [Tooltip("Optional: Shadow components on CardImage for glow effect")]
-    public Shadow[] glowShadows; // Multiple shadows for glow effect
+    [Tooltip("Shadow components for glow effect on hover")]
+    public Shadow[] glowShadows;
 
     [Header("Glow Colors")]
-    public Color monsterGlow = new Color(1f, 0.3f, 0.3f, 0.5f); // Red
-    public Color potionGlow = new Color(0.3f, 1f, 0.3f, 0.5f);  // Green
-    public Color weaponGlow = new Color(0.3f, 0.7f, 1f, 0.5f);  // Blue
+    public Color monsterGlow = new Color(1f, 0.3f, 0.3f, 0.8f); // Red
+    public Color potionGlow = new Color(0.3f, 1f, 0.3f, 0.8f);  // Green
+    public Color weaponGlow = new Color(0.3f, 0.7f, 1f, 0.8f);  // Blue
 
     private CombatCard card;
     private RoomCardData cardData;
     private Action<CombatCard> onCardClicked;
     private bool isInteractable = true;
 
+    /// <summary>
+    /// Initialize without sprite data
+    /// </summary>
     public void Initialize(CombatCard combatCard, Action<CombatCard> clickCallback)
     {
         card = combatCard;
@@ -36,6 +44,9 @@ public class RoomCardUISlot : MonoBehaviour, IPointerClickHandler, IPointerEnter
         UpdateDisplay();
     }
 
+    /// <summary>
+    /// Initialize with sprite data from RoomCardData
+    /// </summary>
     public void Initialize(CombatCard combatCard, RoomCardData roomCardData, Action<CombatCard> clickCallback)
     {
         card = combatCard;
@@ -52,14 +63,20 @@ public class RoomCardUISlot : MonoBehaviour, IPointerClickHandler, IPointerEnter
             return;
         }
 
-        // ✅ Set card sprite (main visual)
+        // ===== CARD IMAGE (Main Visual) =====
         if (cardImage != null)
         {
             if (cardData != null && cardData.cardSprite != null)
             {
-                // Use sprite from artist
+                // Use sprite from ScriptableObject
                 cardImage.sprite = cardData.cardSprite;
                 cardImage.color = Color.white;
+            }
+            else
+            {
+                // Fallback: solid color if no sprite
+                cardImage.sprite = null;
+                cardImage.color = GetFallbackColor();
             }
         }
         else
@@ -67,22 +84,48 @@ public class RoomCardUISlot : MonoBehaviour, IPointerClickHandler, IPointerEnter
             Debug.LogError("[RoomCardUI] cardImage is null! Assign in Inspector.");
         }
 
-        // ✅ HP text - ONLY for monsters
+        // ===== TYPE TEXT (Label) =====
+        if (typeText != null)
+        {
+            if (card.isMonster)
+            {
+                typeText.text = "MONSTER";
+                typeText.color = Color.red;
+            }
+            else if (card.suit == "Heart")
+            {
+                typeText.text = "HEAL";
+                typeText.color = Color.green;
+            }
+            else if (card.suit == "Diamond")
+            {
+                typeText.text = "WEAPON";
+                typeText.color = Color.cyan;
+            }
+            else
+            {
+                typeText.text = "CARD";
+                typeText.color = Color.white;
+            }
+        }
+
+        // ===== HP TEXT (Only for Monsters) =====
         if (hpText != null)
         {
             if (card.isMonster)
             {
                 hpText.gameObject.SetActive(true);
-                hpText.text = $"HP : {card.currentHP}";
-                hpText.color = monsterGlow; 
+                hpText.text = $"HP: {card.currentHP}";
+                hpText.color = Color.white;
             }
             else
             {
+                // Hide HP for non-monsters
                 hpText.gameObject.SetActive(false);
             }
         }
 
-        // ✅ Setup glow shadows (if exists)
+        // ===== GLOW EFFECT SETUP =====
         if (glowShadows != null && glowShadows.Length > 0)
         {
             Color glowColor = GetGlowColor();
@@ -97,16 +140,65 @@ public class RoomCardUISlot : MonoBehaviour, IPointerClickHandler, IPointerEnter
         }
     }
 
-    // ✅ Click handler - No Button needed!
+    /// <summary>
+    /// Update HP text when monster takes damage
+    /// </summary>
+    public void UpdateHP()
+    {
+        if (card != null && card.isMonster && hpText != null && hpText.gameObject.activeSelf)
+        {
+            hpText.text = $"HP: {card.currentHP}";
+
+            // Optional: Change color based on HP
+            if (card.currentHP <= 0)
+            {
+                hpText.color = Color.gray;
+            }
+            else if (card.currentHP <= card.grade * 0.3f)
+            {
+                hpText.color = Color.red;
+            }
+            else if (card.currentHP <= card.grade * 0.6f)
+            {
+                hpText.color = Color.yellow;
+            }
+            else
+            {
+                hpText.color = Color.white;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Enable/disable card interaction
+    /// </summary>
+    public void SetInteractable(bool interactable)
+    {
+        isInteractable = interactable;
+
+        // Optional: Visual feedback when not interactable
+        if (cardImage != null)
+        {
+            cardImage.color = interactable ? Color.white : new Color(0.6f, 0.6f, 0.6f);
+        }
+    }
+
+    public CombatCard GetCard() => card;
+
+    // ===== CLICK HANDLER =====
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (!isInteractable) return;
+        if (!isInteractable)
+        {
+            Debug.Log("[RoomCardUI] Card not interactable!");
+            return;
+        }
 
         Debug.Log($"[RoomCardUI] Card clicked: {card.suit} {card.grade}");
         onCardClicked?.Invoke(card);
     }
 
-    // ✅ Hover enter - Show glow
+    // ===== HOVER ENTER - Show Glow =====
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (!isInteractable) return;
@@ -121,11 +213,11 @@ public class RoomCardUISlot : MonoBehaviour, IPointerClickHandler, IPointerEnter
             }
         }
 
-        // Optional: Scale up slightly
+        // Optional: Scale up slightly for feedback
         transform.localScale = Vector3.one * 1.05f;
     }
 
-    // ✅ Hover exit - Hide glow
+    // ===== HOVER EXIT - Hide Glow =====
     public void OnPointerExit(PointerEventData eventData)
     {
         // Disable all shadow components
@@ -142,28 +234,11 @@ public class RoomCardUISlot : MonoBehaviour, IPointerClickHandler, IPointerEnter
         transform.localScale = Vector3.one;
     }
 
-    public void UpdateHP()
-    {
-        if (card.isMonster && hpText != null && hpText.gameObject.activeSelf)
-        {
-            hpText.text = $"HP: {card.currentHP}";
-        }
-    }
+    // ===== HELPER METHODS =====
 
-    public void SetInteractable(bool interactable)
-    {
-        isInteractable = interactable;
-
-        // Optional: Darken when not interactable
-        if (cardImage != null)
-        {
-            cardImage.color = interactable ? Color.white : new Color(0.5f, 0.5f, 0.5f);
-        }
-    }
-
-    public CombatCard GetCard() => card;
-
-    // Fallback colors when no sprite
+    /// <summary>
+    /// Fallback color when no sprite is assigned
+    /// </summary>
     Color GetFallbackColor()
     {
         if (card.isMonster) return new Color(0.8f, 0.2f, 0.2f); // Red
@@ -172,6 +247,9 @@ public class RoomCardUISlot : MonoBehaviour, IPointerClickHandler, IPointerEnter
         return Color.gray;
     }
 
+    /// <summary>
+    /// Get glow color based on card type
+    /// </summary>
     Color GetGlowColor()
     {
         if (card.isMonster) return monsterGlow;

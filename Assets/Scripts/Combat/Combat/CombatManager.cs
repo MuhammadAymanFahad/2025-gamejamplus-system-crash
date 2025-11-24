@@ -55,7 +55,13 @@ public class CombatManager : MonoBehaviour, ICombatSystem
 
     public void StartCombat(List<CombatCard> roomCards)
     {
-        Debug.Log($"[CombatManager] ===== StartCombat CALLED ===== Received {roomCards?.Count ?? 0} cards");
+        StartCombat(roomCards, null); // Call overload with null
+    }
+
+    // Add overload to accept original RoomCardData
+    public void StartCombat(List<CombatCard> roomCards, List<RoomCardData> originalCardData = null)
+    {
+        Debug.Log($"[CombatManager] StartCombat with {roomCards?.Count ?? 0} cards");
 
         if (roomCards == null || roomCards.Count == 0)
         {
@@ -63,32 +69,23 @@ public class CombatManager : MonoBehaviour, ICombatSystem
             return;
         }
 
-        foreach (var card in roomCards)
-        {
-            Debug.Log($"  - {card.suit} {card.grade} (Monster: {card.isMonster})");
-        }
-
         inCombat = true;
         player.SetCombatState(true);
 
+        // Initialize turn manager with monsters
         List<CombatCard> monsters = roomCards.FindAll(c => c.isMonster);
         if (monsters.Count > 0)
         {
-            Debug.Log($"[CombatManager] Initializing turn manager with {monsters.Count} monsters");
             turnManager.InitializeCombat(monsters);
         }
-        else
-        {
-            Debug.Log("[CombatManager] No monsters - treasure room!");
-        }
 
+        // ✅ Show UI with BOTH lists (for sprites)
         if (CombatUIManager.Instance != null)
         {
-            Debug.Log($"[CombatManager] Showing ALL {roomCards.Count} cards in UI");
-            CombatUIManager.Instance.ShowCombat(roomCards); // Pass ALL cards!
+            CombatUIManager.Instance.ShowCombat(roomCards, originalCardData);
         }
 
-        Debug.Log("[CombatManager] ===== COMBAT START COMPLETE =====");
+        Debug.Log("[CombatManager] Combat started!");
     }
 
     public void PlayerAttack(CombatCard targetMonster)
