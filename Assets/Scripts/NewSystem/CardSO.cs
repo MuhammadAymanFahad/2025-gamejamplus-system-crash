@@ -2,7 +2,7 @@ using UnityEngine;
 
 public enum CardType { Heart, Diamond, Spade, Clover, Joker }
 
-[CreateAssetMenu(menuName ="Cards/CardSO")]
+[CreateAssetMenu(menuName ="Scriptable Objects/CardSO")]
 public class CardSO : ScriptableObject
 {
     public string cardId;
