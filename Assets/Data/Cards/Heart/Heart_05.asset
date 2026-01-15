@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0a81be6db7af1c46b9c1dae694bce7f, type: 3}
   m_Name: Heart_05
   m_EditorClassIdentifier: 
-  cardId: 
+  cardId: Heart_05
   type: 0
-  grade: 0
-  artwork: {fileID: 0}
+  grade: 5
+  artwork: {fileID: -5602901841645565902, guid: b8d37473d0c979045b4e078d87465cb6, type: 3}
   description: 

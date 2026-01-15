@@ -15,5 +15,5 @@ MonoBehaviour:
   cardId: Spade_08
   type: 2
   grade: 8
-  artwork: {fileID: 0}
+  artwork: {fileID: 8938307060754621319, guid: 4b0532516d3ef5842907779e482604c5, type: 3}
   description: 
