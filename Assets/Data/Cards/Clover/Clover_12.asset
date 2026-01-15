@@ -15,5 +15,5 @@ MonoBehaviour:
   cardId: Clover_12
   type: 3
   grade: 12
-  artwork: {fileID: 0}
+  artwork: {fileID: 8358136312512998795, guid: 1e4e8f77851930243a26909fa769c44e, type: 3}
   description: 
