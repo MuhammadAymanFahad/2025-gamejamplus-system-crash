@@ -15,5 +15,5 @@ MonoBehaviour:
   cardId: Diamond_03
   type: 1
   grade: 3
-  artwork: {fileID: 0}
+  artwork: {fileID: 217731748482568351, guid: 98416da79dc2db4438b86afdb8edce27, type: 3}
   description: 

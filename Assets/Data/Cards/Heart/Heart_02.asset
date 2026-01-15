@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardId: Heart_02
   type: 0
-  grade: 0
-  artwork: {fileID: 0}
+  grade: 2
+  artwork: {fileID: -4497456163085230712, guid: dfce9c6063dd0e9499de4f85b3493a06, type: 3}
   description: 
