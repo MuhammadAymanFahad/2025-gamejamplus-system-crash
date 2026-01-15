@@ -22,18 +22,24 @@ public class FloorManager : MonoBehaviour
     public void SetupFloor(int floorIndex)
     {
         currentFloorIndex = floorIndex;
-        deckManager.BuildAndPartitionDeck();
-        currentFloorDeck = deckManager.GetFloorDeck(floorIndex);
-
-        int cardIndex = 0;
-        for (int r= 0; r < 4; r++ )
+        var floorDeck = deckManager.GetFloorDeck(floorIndex);
+        if (floorDeck == null)
         {
-            var four = currentFloorDeck.GetRange(cardIndex, 4);
-            rooms[r] = new RoomState(four);
-            cardIndex += 4;
+            Debug.LogError("No floor deck available. Make sure BuildAndPartitionDeck was called.");
+            return;
         }
 
-        escapeTryCount = 0;
+        rooms = new RoomState[4];
+        int cardIndex = 0;
+        for (int r = 0; r < 4; r++)
+        {
+            int take = Mathf.Min(4, Mathf.Max(0, floorDeck.Count - cardIndex));
+            var four = floorDeck.GetRange(cardIndex, take);
+            rooms[r] = new RoomState(four);
+            cardIndex += take;
+        }
+
+        Debug.Log($"Floor {floorIndex} setup: rooms prepared with counts: {rooms[0].cards.Count}, {rooms[1].cards.Count}, {rooms[2].cards.Count}, {rooms[3].cards.Count}");
     }
 
     public bool TryEscape()

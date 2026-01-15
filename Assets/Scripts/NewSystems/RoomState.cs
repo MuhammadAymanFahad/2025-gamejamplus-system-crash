@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 public class RoomState
 {
@@ -7,21 +8,26 @@ public class RoomState
 
     public RoomState(IEnumerable<CardSO> fourCards)
     {
-        foreach(var c in fourCards)
-        {
-            cards.Add(new RoomCardInstance(c));
+        if (fourCards != null)
+        {cards = fourCards.Select(card => new RoomCardInstance(card)).ToList();
+
         }
     }
 
     public bool HasUnresolvedEnemies()
     {
-        foreach (var c in cards)
+        foreach (var cards in cards)
         { 
-            if((c.cardData.type == CardType.Spade || c.cardData.type == CardType.Clover) && c.state != CardRevealState.Resolved)
+            if (cards.cardData != null && (cards.cardData.type == CardType.Spade || cards.cardData.type == CardType.Clover) && cards.state != CardRevealState.Resolved)
             {
                 return true;
             }
         }
         return false;
+    }
+
+    public void UpdateCompletion()
+    {
+        this.isCompleted = !HasUnresolvedEnemies();
     }
 }
