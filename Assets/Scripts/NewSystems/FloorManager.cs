@@ -12,8 +12,8 @@ public class FloorManager : MonoBehaviour
 
     void Awake()
     {
-        deckManager = FindObjectOfType<DeckManager>();
-        if(deckManager == null)
+        deckManager = UnityEngine.Object.FindFirstObjectByType<DeckManager>();
+        if (deckManager == null)
         {
             Debug.LogError("DeckManager not found in the scene.");
         }
