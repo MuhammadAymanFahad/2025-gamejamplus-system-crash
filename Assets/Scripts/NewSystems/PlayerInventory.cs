@@ -14,12 +14,27 @@ public class PlayerInventory : MonoBehaviour
             instance = this;
             DontDestroyOnLoad(gameObject);
         }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
-    public void AddPotion(CardSO potion)
+    public void AddPotion(CardSO potionCard)
     {
-        potionStack.Push(potion);
-        Debug.Log("Added potion, grade : " + potion.grade + ", total potion : " + potionStack.Count);
+        if(potionCard == null)
+        {
+            Debug.LogError("Potion card is null.");
+            return;
+        }
+        if(potionCard.type != CardType.Heart)
+        {
+            Debug.LogWarning("Tried to add non-potion card as potion.");
+            return;
+        }
+        
+        potionStack.Push(potionCard);
+        Debug.Log("Added potion, grade : " + potionCard.grade + ", total potion : " + potionStack.Count);
     }
 
     public CardSO UsePotion()
@@ -50,7 +65,7 @@ public class PlayerInventory : MonoBehaviour
     public void DiscardWeapon()
     {
         weaponStack.Clear();
-        Debug.Log("All weapons discarded, total weapons : " + weaponStack.Count);
+        Debug.Log("All weapons discarded");
     }
 
     public WeaponInstance GetCurrectWeapon()

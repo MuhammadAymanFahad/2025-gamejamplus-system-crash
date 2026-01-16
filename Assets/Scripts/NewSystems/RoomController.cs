@@ -5,46 +5,50 @@ using System;
 [RequireComponent(typeof(RectTransform))]
 public class RoomController : MonoBehaviour
 {
+    [Header("Room Setup")]
     public int roomIndex = 0;
     public Button[] cardButtons;
 
-    private FloorManager floorManager;
+    [Header("Dependencies (assign in Inspector or leave null to auto find)")]
+    [SerializeField] private PlayerInventory playerInventory;
+    [SerializeField] private FloorManager floorManager;
+
     private RoomState roomState;
 
     private void Start()
     {
-        floorManager = FindObjectOfType<FloorManager>();
         if (floorManager == null)
         {
-            Debug.LogError("FloorManager not found in the scene.");
-            return;
-        }
-        
-        if (floorManager.rooms != null && floorManager.rooms.Length > roomIndex)
-        {
-            roomState = floorManager.rooms[roomIndex];
-        } 
-        else {
-            Debug.LogError($"RoomState for index {roomIndex} not found. Make sure FloorManager.SetupFloor was called.");
-            return;
-        }
-
-        if (cardButtons == null || cardButtons.Length == 0)
-        {
-            var btns = GetComponentsInChildren<Button>();
-            cardButtons = new Button[btns.Length];
-            for (int i = 0; i < btns.Length; i++)
+            // Use the newest API if available, else fallback to older FindObjectOfType
+            floorManager = UnityEngine.Object.FindFirstObjectByType<FloorManager>();
+            if (floorManager == null)
             {
-                cardButtons[i] = btns[i];
+                Debug.LogError("FloorManager not found in the scene. Make sure FloorManager GameObject Exists");
+                return;
             }
-        }
 
-        for (int i = 0; i < cardButtons.Length; i++)
-        {
-            int index = i;
-            cardButtons[i].onClick.RemoveAllListeners();
-            cardButtons[i].onClick.AddListener(() => OnCardClicked(index));
-            UpdateCardVisual(index);
+            if (playerInventory == null)
+            {
+                playerInventory = UnityEngine.Object.FindFirstObjectByType<PlayerInventory>();
+            }
+
+            if (cardButtons == null || cardButtons.Length == 0)
+            {
+                var buttons = GetComponentsInChildren<Button>();
+                cardButtons = new Button[buttons.Length];
+                for (int i = 0; i < buttons.Length; i++)
+                {
+                    cardButtons[i] = buttons[i];
+                }
+            }
+
+            for (int i = 0; i < cardButtons.Length; i++)
+            {
+                int index = i;
+                cardButtons[i].onClick.RemoveAllListeners();
+                cardButtons[i].onClick.AddListener(() => OnCardClicked(index));
+                UpdateCardVisual(index);
+            }
         }
     }
 
@@ -55,55 +59,46 @@ public class RoomController : MonoBehaviour
             return;
         }
 
-        if(cardIndex < 0 || cardIndex >= roomState.cards.Count)
+        if (cardIndex < 0 || cardIndex >= roomState.cards.Count)
         {
-            Debug.LogWarning("Card index out of range or card missing.");
+            Debug.LogWarning("Card Indexout of range or card missing");
             return;
         }
 
         var roomCardIndex = roomState.cards[cardIndex];
         if (roomCardIndex.state != CardRevealState.Hidden)
         {
-            Debug.Log("Card already revealed/resolved");
+            Debug.Log("Card already revealed or resolved");
             return;
         }
 
         roomCardIndex.state = CardRevealState.Revealed;
-        Debug.Log($"Revealed card in room {roomIndex} slot {cardIndex}: type={roomCardIndex.cardData.type}, grade={roomCardIndex.cardData.grade}");
+        Debug.Log($"Revealed card room {roomIndex} slot {cardIndex}: type={roomCardIndex.cardData.type}, grade= {roomCardIndex.cardData.grade}");
 
         switch (roomCardIndex.cardData.type)
         {
             case CardType.Heart:
-                PlayerInventory.Instance.AddPotion(roomCardIndex.cardData);
+                playerInventory?.AddPotion(roomCardIndex.cardData);
                 roomCardIndex.state = CardRevealState.Resolved;
                 break;
 
             case CardType.Diamond:
-                // For now: auto-pickup. Later show UI confirm pick/abandon.
-                PlayerInventory.Instance.PickupWeapon(roomCardIndex.cardData);
-                roomCardIndex.state = CardRevealState.Resolved;
-                break;
-
-            case CardType.Joker:
-                // implement relic application elsewhere; for now just resolve
-                Debug.Log("Joker revealed - apply relic later");
+                playerInventory?.PickupWeapon(roomCardIndex.cardData);
                 roomCardIndex.state = CardRevealState.Resolved;
                 break;
 
             case CardType.Spade:
-                // Enemy: start combat and wait for callback
                 StartCombatForCard(cardIndex, roomCardIndex.cardData);
-                return; // don't call UpdateCompletion until combat callback
-
+                return;
 
             case CardType.Clover:
-                // Enemy: start combat and wait for callback
                 StartCombatForCard(cardIndex, roomCardIndex.cardData);
-                return; // don't call UpdateCompletion until combat callback
+                return;
         }
 
         UpdateCardVisual(cardIndex);
         roomState.UpdateCompletion();
+
         if (roomState.isCompleted)
         {
             OnRoomCompleted();
@@ -112,12 +107,84 @@ public class RoomController : MonoBehaviour
 
     void StartCombatForCard(int cardIndex, CardSO enemyCard)
     {
-        
+        // Find a CombatBridge instance (no static Instance required)
+        var combatBridgeInstance = UnityEngine.Object.FindFirstObjectByType<CombatBridge>();
+
+        if (combatBridgeInstance == null)
+        {
+            Debug.Log("CombatBridge not found: simulating instant victory (dev mode).");
+            playerInventory?.AddWeaponFromEnemy(enemyCard.grade);
+            roomState.cards[cardIndex].state = CardRevealState.Resolved;
+            UpdateCardVisual(cardIndex);
+            roomState.UpdateCompletion();
+
+            if (roomState.isCompleted)
+            {
+                OnRoomCompleted();
+            }
+
+            return;
+        }
+
+        combatBridgeInstance.StartCombat(enemyCard, (result) =>
+        {
+            if (result == null) return;
+
+            if (result.outcome == CombatOutcome.Victory)
+            {
+                playerInventory?.AddWeaponFromEnemy(result.monsterGrade);
+                roomState.cards[cardIndex].state = CardRevealState.Resolved;
+            }
+            else if (result.outcome == CombatOutcome.Fled && result.fledSuccess)
+            {
+                Debug.Log("Player fled successfully.");
+            }
+            else if (result.outcome == CombatOutcome.Defeat)
+            {
+                Debug.Log("Player defeated - implement death flow.");
+            }
+
+            UpdateCardVisual(cardIndex);
+            roomState.UpdateCompletion();
+            if (roomState.isCompleted) OnRoomCompleted();
+        });
     }
 
     void UpdateCardVisual(int cardIndex)
     {
-        // Implement visual update logic here
+        if (cardIndex < 0 || cardIndex >= cardButtons.Length)
+        {
+            return;
+        }
+
+        var button = cardButtons[cardIndex];
+        var text = button.GetComponentInChildren<UnityEngine.UI.Text>();
+
+        if (text == null)
+        {
+            return;
+        }
+
+        var roomCardIndex = (cardIndex < roomState.cards.Count) ? roomState.cards[cardIndex] : null;
+        if (roomCardIndex == null)
+        {
+            text.text = "N/A";
+        }
+        else
+        {
+            if (roomCardIndex.state == CardRevealState.Hidden)
+            {
+                text.text = "Face Down";
+            }
+            else if (roomCardIndex.state == CardRevealState.Revealed)
+            {
+                text.text = $"{roomCardIndex.cardData.type} {roomCardIndex.cardData.grade}";
+            }
+            else
+            {
+                text.text = $"Resolved";
+            }
+        }
     }
 
     void OnRoomCompleted()
